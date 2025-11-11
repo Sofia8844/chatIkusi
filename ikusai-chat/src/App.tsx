@@ -62,17 +62,18 @@ const initialChatSections: ChatSection[] = [
         timestamp: '10:30 AM',
         content: 'Hello! How can I help you today?',
         isAI: true,
+        isSend: false,
         avatarUrl:
           'https://lh3.googleusercontent.com/aida-public/AB6AXuAIZCmYMZ9_aJOi5pTg3T5Ntwj-Fi9erZXdUDr5Je1z8U9Kb7mmxW_I6SYTBgYpC50dq_-9OGZ3ZrVPxpg1uG6-VakLuxcTQpCVV7BfrMaTDy7bKrhZfVLyDQF0-oyElN18njlmjUFgJXWVyRPUVATFQMD1aR29XSf89Y4_avBBwwHBylE1pOE5goaM-twUJcdXF_eaFUkPZF6qJsI2pINsAN3CYHsmgovqD7tZ7fX0Y19LzptnhAixdAmCVNv5XcigW_mGI-_JcRY',
       },
-      {
+  /*     {
         id: 'message-2',
         author: 'You',
         timestamp: '10:30 AM',
         content: 'Can you show me the sales data for the last quarter?',
         isAI: false,
         userInitial: 'J',
-      },
+      }, */
     ],
   },
   {
@@ -85,6 +86,7 @@ const initialChatSections: ChatSection[] = [
         timestamp: '10:31 AM',
         content: 'Of course, pulling that up for you now...',
         isAI: true,
+        isSend: false,
         avatarUrl:
           'https://lh3.googleusercontent.com/aida-public/AB6AXuDHpgDosUe68D-9PJLcDNiE8oyEJyMHYXWhEBUw3_t1kLHriFsgy0-kY9kDAZlgWXrBPzxBOCBav0pTJHGUQqwTy-FLzWAYUYgGY7rRh8u2sKlcz2_GlMqzYCV8cQs9EOj2PC8y_wZXL1rbO073AO_I1SEhZNAGNSFvpVb-TJy2y5V0cIU9Gh9FNiVhYUXqG0HcIfBbwESUEBBoTExZJbHggKbf79ODWkNMFEP5gPFGFJcEKCEWsTMfjcNfoF2qWoyaYW2HolahyRQ',
       },
@@ -126,6 +128,7 @@ const getInitialDarkMode = (): boolean => {
 
 const App = () => {
   const [chatSections, setChatSections] = useState<ChatSection[]>(initialChatSections)
+//const [chatSections, setChatSections] = useState<ChatSection[]>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
   const [showDashboard, setShowDashboard] = useState(false);
 const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -181,71 +184,45 @@ const handleToggleSidebar = () => {
     setShowDashboard((prev) => !prev);
   };
 
-  const handleSendMessage = (content: string) => {
-    const timestamp = new Date().toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    })
+const handleSendMessage = async (content: string) => {
+  const timestamp = new Date().toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
 
-    const newMessage: ChatMessageProps = {
-      id: `user-${Date.now()}`,
-      author: 'You',
-      timestamp,
-      content,
-      isAI: false,
-      userInitial: 'J',
-    }
+  // 1️⃣ Mensaje del usuario
+  const userMessage: ChatMessageProps = {
+    id: `user-${Date.now()}`,
+    author: 'You',
+    timestamp,
+    content,
+    isAI: false,
+    userInitial: 'J',
+    isSend: true,
+  };
 
-    setChatSections((previous) => {
-      if (previous.length === 0) {
-        return [
-          {
-            id: 'chat-today',
-            label: 'Hoy',
-            messages: [newMessage],
-          },
-        ]
-      }
-      const [firstSection, ...rest] = previous
-      const updatedFirst: ChatSection = {
-        ...firstSection,
-        messages: [...firstSection.messages, newMessage],
-      }
-      return [updatedFirst, ...rest]
-    });
-    if (content.toLowerCase().includes("grafico") || content.toLowerCase().includes("chart")) {
-      const chartData = [
-        { name: "Ene", value: 4000 },
-        { name: "Feb", value: 3000 },
-        { name: "Mar", value: 5000 },
-        { name: "Abr", value: 4500 },
-        { name: "May", value: 6000 },
-      ];
+  // 2️⃣ Mensaje AI temporal
+  const aiMessage: ChatMessageProps = {
+    id: `ai-${Date.now()}`,
+    author: 'AI Assistant',
+    timestamp,
+    content: content, // vacío por ahora
+    isAI: true,
+    isSend: true,
+    avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAIZCmYMZ9_aJOi5pTg3T5Ntwj-Fi9erZXdUDr5Je1z8U9Kb7mmxW_I6SYTBgYpC50dq_-9OGZ3ZrVPxpg1uG6-VakLuxcTQpCVV7BfrMaTDy7bKrhZfVLyDQF0-oyElN18njlmjUFgJXWVyRPUVATFQMD1aR29XSf89Y4_avBBwwHBylE1pOE5goaM-twUJcdXF_eaFUkPZF6qJsI2pINsAN3CYHsmgovqD7tZ7fX0Y19LzptnhAixdAmCVNv5XcigW_mGI-_JcRY',
+  };
 
-      const aiMessage: ChatMessageProps = {
-        id: `ai-${Date.now()}`,
-        author: "AI Assistant",
-        timestamp,
-        content: "Aquí tienes el gráfico solicitado 📊",
-        isAI: true,
-        type: "diagram",
-        diagramData: chartData,
-      };
-
-      setTimeout(() => {
-        setChatSections((prev) => {
-          const [first, ...rest] = prev;
-          const updated = {
-            ...first,
-            messages: [...first.messages, aiMessage],
-          };
-          return [updated, ...rest];
-        });
-      }, 1000);
-    }
-    
-  }
+  // 3️⃣ Actualizar chatSections agregando ambos mensajes
+  setChatSections((prev) => {
+    const [firstSection, ...rest] = prev;
+    const updatedSection: ChatSection = {
+      ...firstSection,
+      messages: [...firstSection.messages, userMessage, aiMessage],
+    };
+    return [updatedSection, ...rest];
+  });
+};
 
   return (
 
@@ -273,8 +250,7 @@ const handleToggleSidebar = () => {
             onToggleTheme={handleToggleTheme}
             onSendMessage={handleSendMessage}
             onGenerateDashboard={handleToggleDashboard}
-            isActive={showDashboard}
-          />
+            isActive={showDashboard}          />
         </div>
       ) : (
         <DraggableChat
