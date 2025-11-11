@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html {
+    font-family: 'Roboto', sans-serif;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-background-light text-light-text-primary antialiased dark:bg-background-dark dark:text-dark-text-primary;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .chat-bubble-gradient {
+    background: linear-gradient(135deg, #005a3b 0%, #108c4f 100%);
+  }
+
+  .ai-chat-bubble-gradient-light {
+    background: linear-gradient(135deg, #e6f3ec 0%, #f5fbf8 100%);
+  }
+
+  .ai-chat-bubble-gradient-dark {
+    background: linear-gradient(135deg, #102a20 0%, #15392a 100%);
+  }
+}

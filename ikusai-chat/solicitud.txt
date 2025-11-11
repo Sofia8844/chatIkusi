@@ -1,0 +1,54 @@
+
+You are Codex AI. Modify the provided React + TypeScript component so that it behaves correctly inside the viewport.
+
+📁 File: DraggableChat.tsx
+
+🧩 Requirements:
+1. The chat is draggable within the visible browser window (`body` bounds).
+2. When the chat is collapsed and reopened near the top edge of the screen, its content must expand **downward**, never outside the visible area.
+3. When it’s near the bottom, the chat must expand **upward** but always stay fully visible.
+4. The draggable movement must remain smooth and responsive.
+5. Do not override or break the `transform` applied by `react-draggable`.
+6. Ensure that when expanding, the component adjusts its position automatically if part of it would overflow outside the viewport.
+7. Keep all existing props and typing exactly as they are.
+8. The chat must remain resizable, draggable, and responsive with Tailwind CSS transitions.
+9. Add a small helper `adjustPositionWithinViewport()` function that calculates and corrects position when the chat expands.
+
+Props available:
+- sections: ChatSection[]
+- quickActions: QuickAction[]
+- isDarkMode: boolean
+- onToggleTheme: () => void
+- onSendMessage: (message: string) => void
+- onGenerateDashboard: () => void
+- isActive: boolean
+
+Current imports:
+import React, { useState, useRef, useEffect } from "react";
+import Draggable, { DraggableEvent, DraggableData } from "react-draggable";
+import ChatContainer from "./ChatContainer";
+import type { ChatSection, QuickAction } from "../types/chat";
+
+Behavior summary:
+The chat starts collapsed in the bottom-right corner.
+When the user clicks "open_in_full", it should expand smoothly in the visible area without going outside of the viewport.
+If the user drags it close to the top edge and then reopens, it should shift down automatically to stay visible.
+
+---
+
+🧠 Expected behavior:
+- If the chat is within 30px of the top, move it down automatically.
+- If expanding would exceed window.innerHeight, move it upward automatically.
+- Use a function like:
+
+function adjustPositionWithinViewport(node: HTMLDivElement): { y: number }
+
+to compute the new offset, then call setOffsetY(y).
+
+Keep movement and animation smooth with Tailwind transitions.
+
+---
+
+💡 Deliverable:
+Rewrite the DraggableChat component applying these corrections.
+Do not remove any props or styles, only add viewport-safe expansion behavior.

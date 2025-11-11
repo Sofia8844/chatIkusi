@@ -1,0 +1,367 @@
+# Objetivo
+Quiero crear una aplicación web moderna llamada **IkusAI Chat** usando React, TypeScript, Vite y TailwindCSS.
+El diseño base es el HTML que adjunto más abajo, el cual quiero que se transforme completamente en componentes React funcionales escritos en TypeScript.
+
+Además, necesito que se genere la configuración completa para crear una **imagen Docker de producción** que sirva la aplicación (multi-stage build) y un `docker-compose.yml` para desarrollo y producción.
+
+# Stack técnico
+- React 18 con TypeScript
+- Vite
+- Tailwind CSS configurado en modo JIT
+- Dark Mode activado con la clase `dark`
+- Estructura modular con tipado fuerte en los props de cada componente
+- Docker multi-stage para producción (build -> nginx)
+- docker-compose para desarrollo (servir con vite) y producción (servir con nginx)
+
+# Requerimientos (resumen)
+1. Proyecto base (TypeScript):
+   ```
+   npm create vite@latest ikusai-chat -- --template react-ts
+   cd ikusai-chat
+   npm install
+   npm install -D tailwindcss postcss autoprefixer
+   npx tailwindcss init -p
+   ```
+   y configurar Tailwind según la documentación oficial.
+
+2. Tailwind config:
+   - Incluir los colores y temas definidos en mi HTML.
+   - Usar `darkMode: "class"`.
+
+3. Estructura del proyecto:
+   ```
+   src/
+   ├── components/
+   │   ├── Sidebar.tsx
+   │   ├── ChatHeader.tsx
+   │   ├── ChatMessage.tsx
+   │   ├── MessageInput.tsx
+   │   ├── ChatContainer.tsx
+   ├── types/
+   │   ├── chat.ts
+   ├── App.tsx
+   ├── main.tsx
+   └── index.css
+   ```
+
+4. Tipos e interfaces:
+   Crear `src/types/chat.ts` con las interfaces `ChatMessageProps` y `ChatHistoryItem`.
+
+5. Componentes:
+   - Tipados con `React.FC<...>` o `FC`.
+   - `MessageInput` debe recibir `onSend(message: string): void`.
+   - `ChatMessage` debe soportar `isAI` para alternar estilos (AI vs user).
+   - Mantener gradientes y estilos originales.
+
+6. Dark mode:
+   - Toggle manual y preferencia del sistema (usar `useEffect` para añadir `dark` si corresponde).
+
+7. Build & Run scripts:
+   En `package.json` incluir scripts recomendados:
+   ```json
+   "scripts": {
+     "dev": "vite",
+     "build": "vite build",
+     "preview": "vite preview --port 4173",
+     "lint": "eslint . --ext .ts,.tsx",
+     "format": "prettier --write ."
+   }
+   ```
+
+8. Typescript strict:
+   Sugerir `"strict": true` en `tsconfig.json`.
+
+# Docker (lo que debe generar)
+Generar **automáticamente** los siguientes archivos en la raíz del proyecto:
+
+1. `Dockerfile` (multi-stage, recomendado):
+   - Stage 1: node:18-alpine -> instalar deps, build (`npm ci` y `npm run build`).
+   - Stage 2: nginx:stable-alpine -> copiar `dist` a `/usr/share/nginx/html`, configurar `nginx.conf` para no cachear `index.html` y habilitar gzip.
+   - Añadir `HEALTHCHECK` que haga `curl --fail http://localhost:80/ || exit 1`.
+   - Etiquetar puerto `EXPOSE 80`.
+
+   Ejemplo (incluir en el prompt para que Codex lo genere exactamente):
+   ```
+   # -- Dockerfile --
+   FROM node:18-alpine AS builder
+   WORKDIR /app
+   COPY package*.json ./
+   RUN npm ci
+   COPY . .
+   RUN npm run build
+
+   FROM nginx:stable-alpine AS production
+   RUN apk add --no-cache curl
+   COPY --from=builder /app/dist /usr/share/nginx/html
+   COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+   EXPOSE 80
+   HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost/ || exit 1
+   CMD ["nginx", "-g", "daemon off;"]
+   ```
+
+2. `docker/nginx.conf` (configuración simple para Vite build):
+   ```
+   server {
+     listen 80;
+     server_name _;
+     root /usr/share/nginx/html;
+     index index.html;
+     location / {
+       try_files $uri $uri/ /index.html;
+     }
+     gzip on;
+     gzip_types text/plain application/json text/css application/javascript text/xml application/xml application/xml+rss text/javascript;
+     add_header Cache-Control "no-cache, no-store, must-revalidate";
+     add_header Pragma "no-cache";
+     add_header Expires "0";
+   }
+   ```
+
+3. `.dockerignore`:
+   ```
+   node_modules
+   dist
+   .git
+   .env
+   .env.local
+   .DS_Store
+   ```
+
+4. `docker-compose.yml` con dos servicios:
+   - `app-dev`: usa la imagen node:18, monta el código, expone 5173 y ejecuta `npm run dev` (Vite).
+   - `app-prod`: construye la imagen usando el Dockerfile y expone 80.
+
+   Ejemplo:
+   ```
+   version: '3.8'
+   services:
+     app-dev:
+       image: node:18-alpine
+       working_dir: /app
+       volumes:
+         - ./:/app
+         - /app/node_modules
+       ports:
+         - "5173:5173"
+       command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
+     app-prod:
+       build:
+         context: .
+         dockerfile: Dockerfile
+       ports:
+         - "80:80"
+       restart: unless-stopped
+   ```
+
+5. Instrucciones para construir y ejecutar la imagen:
+   - `docker build -t ikusai-chat:latest .`
+   - `docker run -p 80:80 ikusai-chat:latest`
+   - O usar `docker-compose up --build` para producción.
+
+# Entregable para Codex
+Pide a Codex que genere:
+- Todo el proyecto React + TypeScript + Tailwind (estructura, archivos, componentes tipados).
+- Los archivos de Docker mencionados (`Dockerfile`, `docker/nginx.conf`, `.dockerignore`, `docker-compose.yml`).
+- Scripts en `package.json`.
+- Instrucciones finales para ejecutar localmente y con Docker.
+
+# HTML base
+(Pega este HTML en el cuerpo principal de App.tsx, pero dividido en componentes como se indica arriba)
+
+[INICIO DEL HTML ORIGINAL]
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Chat Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style>
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        .chat-bubble-gradient {
+            background: linear-gradient(135deg, #005A3B 0%, #108C4F 100%);
+        }
+        .ai-chat-bubble-gradient-light {
+             background: linear-gradient(135deg, #E6F3EC 0%, #F5FBF8 100%);
+        }
+        .ai-chat-bubble-gradient-dark {
+             background: linear-gradient(135deg, #102A20 0%, #15392A 100%);
+        }
+    </style>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3DD883",
+              "background-light": "#F8FAFC",
+              "background-dark": "#18181B",
+              'light-accent': '#E6F3EC',
+              'dark-accent': '#1F2937',
+              'light-border': '#E2E8F0',
+              'dark-border': '#374151',
+              'light-text-primary': '#1E293B',
+              'dark-text-primary': '#F8FAFC',
+              'light-text-secondary': '#64748B',
+              'dark-text-secondary': '#94A3B8',
+            },
+            fontFamily: {
+              display: ["Roboto", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+            },
+            backgroundImage: {
+              'chat-gradient-light': 'linear-gradient(180deg, #F0FFF7 0%, #FFFFFF 100%)',
+              'chat-gradient-dark': 'linear-gradient(180deg, #1A2E25 0%, #18181B 100%)',
+            }
+          },
+        },
+      };
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-light-text-primary dark:text-dark-text-primary">
+<div class="flex h-screen">
+<aside class="w-1/4 max-w-xs bg-white dark:bg-zinc-900 border-r border-light-border dark:border-dark-border flex flex-col p-4">
+<h1 class="text-xl font-bold mb-6 px-2">History</h1>
+<nav class="flex-grow space-y-4">
+<div>
+<h2 class="px-2 mb-2 text-sm font-semibold text-light-text-secondary dark:text-dark-text-secondary">Hoy</h2>
+<a class="flex items-center p-2 rounded-lg bg-light-accent dark:bg-dark-accent text-primary font-semibold" href="#">
+<span class="material-icons text-primary mr-3 text-xl">chat_bubble_outline</span>
+                Sales data for the last...
+            </a>
+</div>
+<div>
+<h2 class="px-2 mb-2 text-sm font-semibold text-light-text-secondary dark:text-dark-text-secondary">Ayer</h2>
+<a class="flex items-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-light-text-secondary dark:text-dark-text-secondary" href="#">
+<span class="material-icons mr-3 text-xl">chat_bubble_outline</span>
+                Marketing campaign i...
+            </a>
+<a class="flex items-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-light-text-secondary dark:text-dark-text-secondary" href="#">
+<span class="material-icons mr-3 text-xl">chat_bubble_outline</span>
+                Competitor analysis re...
+            </a>
+<a class="flex items-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-light-text-secondary dark:text-dark-text-secondary" href="#">
+<span class="material-icons mr-3 text-xl">chat_bubble_outline</span>
+                User onboarding flow f...
+            </a>
+</div>
+</nav>
+<button class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300">
+<span class="material-icons text-emerald-500 dark:text-emerald-400">add</span>
+            New Conversation
+        </button>
+</aside>
+<main class="flex-1 flex flex-col bg-chat-gradient-light dark:bg-chat-gradient-dark">
+<header class="flex justify-between items-center p-4">
+<h2 class="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary">IkusAI Chat</h2>
+</header>
+<div class="flex-1 px-6 pb-6 space-y-6 overflow-y-auto">
+<div class="text-center my-4">
+<span class="text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary bg-gray-100 dark:bg-zinc-800 rounded-full px-3 py-1">Hoy</span>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+<img alt="AI Assistant logo" class="w-6 h-6 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIZCmYMZ9_aJOi5pTg3T5Ntwj-Fi9erZXdUDr5Je1z8U9Kb7mmxW_I6SYTBgYpC50dq_-9OGZ3ZrVPxpg1uG6-VakLuxcTQpCVV7BfrMaTDy7bKrhZfVLyDQF0-oyElN18njlmjUFgJXWVyRPUVATFQMD1aR29XSf89Y4_avBBwwHBylE1pOE5goaM-twUJcdXF_eaFUkPZF6qJsI2pINsAN3CYHsmgovqD7tZ7fX0Y19LzptnhAixdAmCVNv5XcigW_mGI-_JcRY"/>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<p class="font-bold text-light-text-primary dark:text-dark-text-primary">AI Assistant</p>
+<p class="text-xs text-light-text-secondary dark:text-dark-text-secondary">10:30 AM</p>
+</div>
+<div class="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary max-w-md">
+<p>Hello! How can I help you today?</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 justify-end">
+<div class="order-2">
+<div class="flex items-baseline gap-2 justify-end">
+<p class="font-bold text-light-text-primary dark:text-dark-text-primary">You</p>
+<p class="text-xs text-light-text-secondary dark:text-dark-text-secondary">10:30 AM</p>
+</div>
+<div class="mt-1 p-4 rounded-lg rounded-br-none chat-bubble-gradient text-white max-w-md">
+<p>Can you show me the sales data for the last quarter?</p>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-orange-200 text-orange-600 flex items-center justify-center font-bold order-1">
+                    J
+                </div>
+</div>
+<div class="text-center my-4">
+<span class="text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary bg-gray-100 dark:bg-zinc-800 rounded-full px-3 py-1">Ayer</span>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+<img alt="AI Assistant logo" class="w-6 h-6 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHpgDosUe68D-9PJLcDNiE8oyEJyMHYXWhEBUw3_t1kLHriFsgy0-kY9kDAZlgWXrBPzxBOCBav0pTJHGUQqwTy-FLzWAYUYgGY7rRh8u2sKlcz2_GlMqzYCV8cQs9EOj2PC8y_wZXL1rbO073AO_I1SEhZNAGNSFvpVb-TJy2y5V0cIU9Gh9FNiVhYUXqG0HcIfBbwESUEBBoTExZJbHggKbf79ODWkNMFEP5gPFGFJcEKCEWsTMfjcNfoF2qWoyaYW2HolahyRQ"/>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<p class="font-bold text-light-text-primary dark:text-dark-text-primary">AI Assistant</p>
+<p class="text-xs text-light-text-secondary dark:text-dark-text-secondary">10:31 AM</p>
+</div>
+<div class="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary max-w-md">
+<p>Of course, pulling that up for you now...</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-light-border dark:border-dark-border bg-background-light dark:bg-background-dark">
+<div class="w-full max-w-3xl mx-auto">
+<div class="flex gap-4 justify-center mb-4">
+<button class="flex items-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300">
+<span class="material-icons text-base text-emerald-500 dark:text-emerald-400">dashboard</span>
+                        Generar Dashboard
+                    </button>
+<button class="flex items-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300">
+<span class="material-icons text-base text-emerald-500 dark:text-emerald-400">chat</span>
+                        Chat Normal
+                    </button>
+</div>
+<div class="relative">
+<input class="w-full py-3 pl-4 pr-12 rounded-lg bg-white dark:bg-zinc-800 border border-light-border dark:border-dark-border focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="Type your message here..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white hover:opacity-90 transition-opacity">
+<span class="material-icons">send</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
+[FIN DEL HTML ORIGINAL]
+
+# Resultado esperado
+Una aplicación React + TypeScript + Tailwind lista para producción, con imagen Docker optimizada y `docker-compose` para desarrollo y producción.
+
+Instrucciones rápidas de uso final:
+1. Local development:
+   - `npm install`
+   - `npm run dev` (open http://localhost:5173)
+
+2. Build & Docker:
+   - `npm run build`
+   - `docker build -t ikusai-chat:latest .`
+   - `docker run -p 80:80 ikusai-chat:latest`
+
+3. Docker-compose:
+   - `docker-compose up --build`
+

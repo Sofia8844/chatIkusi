@@ -1,0 +1,10 @@
+/* Fondo del lienzo con puntos */
+.canvas-grid {
+  position: relative;
+  width: 2000px;   /* ancho total del lienzo */
+  height: 2000px;  /* alto total del lienzo */
+  background-color: #f0f0f0;
+  background-image:   radial-gradient(#A9A9A9 1px, transparent 1px);
+  background-size: 40px 40px; /* distancia entre puntos */
+  transform-origin: 0 0; /* para escalar correctamente con zoom */
+}
