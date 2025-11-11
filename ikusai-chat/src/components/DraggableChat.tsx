@@ -98,7 +98,7 @@ const DraggableChat: React.FC<DraggableChatProps> = ({
         {/* Header draggable */}
         <div 
         className="drag-header flex justify-between items-center px-4 py-2 bg-emerald-600 text-white cursor-move rounded-t-xl">
-          <h2 className="font-semibold text-lg">IkusAI Chat</h2>
+          <h2 className="font-semibold text-lg">IkusAI Chat prueb</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => (isCollapsed ? handleExpand() : setIsCollapsed(true))}
