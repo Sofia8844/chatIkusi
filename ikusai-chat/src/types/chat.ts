@@ -8,7 +8,8 @@ export interface ChatMessageProps {
   userInitial?: string;
   type?: "text" | "diagram",// nuevo campo opcional que indica el tipo de mensaje
   diagramData?: any, // datos del gráfico o del diagrama
-  isSend: boolean
+  isLoading?: boolean,
+  responseData?: any
 }
 
 export interface ChatHistoryItem {

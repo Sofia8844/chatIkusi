@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatContainer from "./ChatContainer";
-import type { ChatSection, QuickAction } from "../types/chat";
+import type { QuickAction,ChatSection  } from "../types/chat";
 
 interface DraggableChatProps {
-  sections: ChatSection[];
   quickActions: QuickAction[];
   isDarkMode: boolean;
   onToggleTheme: () => void;
-  onSendMessage: (message: string) => void;
   onGenerateDashboard: () => void;
-  isActive: Boolean;
+  isActive: boolean;
+  chatSections: ChatSection[];
+  setChatSections: React.Dispatch<React.SetStateAction<ChatSection[]>>;
 }
 
 const TOP_GAP = 30;
@@ -34,13 +34,13 @@ function adjustPositionWithinViewport(node: HTMLDivElement): { y: number } {
 }
 
 const DraggableChat: React.FC<DraggableChatProps> = ({
-  sections,
   quickActions,
   isDarkMode,
   onToggleTheme,
-  onSendMessage,
   onGenerateDashboard,
-  isActive
+  isActive,
+  chatSections,
+   setChatSections
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -117,13 +117,13 @@ const DraggableChat: React.FC<DraggableChatProps> = ({
               className="h-[calc(100%-40px)] overflow-y-auto overflow-x-hidden rounded-b-xl transition-transform duration-300 ease-out"     
             >
               <ChatContainer
-                sections={sections}
                 quickActions={quickActions}
                 isDarkMode={isDarkMode}
                 onToggleTheme={onToggleTheme}
-                onSendMessage={onSendMessage}
                 onGenerateDashboard={onGenerateDashboard}
                 isActive={isActive}
+                  chatSections={chatSections}
+                 setChatSections={setChatSections}
               />
             </div>
           )}

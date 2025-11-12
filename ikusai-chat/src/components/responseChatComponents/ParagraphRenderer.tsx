@@ -1,5 +1,5 @@
 interface Props{
-    data: {natural_languaje_summary?: string; details?: string};
+    data: {natural_language_summary?: string; details?: string};
 }
 
 export default function ParagraphRenderer({data}: Props){

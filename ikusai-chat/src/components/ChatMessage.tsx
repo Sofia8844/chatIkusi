@@ -1,7 +1,6 @@
-import React, { useEffect,useState,FC } from "react";
+import React, { useEffect, useState, FC } from "react";
 import type { ChatMessageProps } from "../types/chat";
 import MessageContent from "./responseChatComponents/ComponentRender";
-import { fetchChatResponse } from "../api/chatService";
 
 const ChatMessage: FC<ChatMessageProps> = ({
   id,
@@ -13,38 +12,24 @@ const ChatMessage: FC<ChatMessageProps> = ({
   userInitial,
   type,
   diagramData,
-  isSend
+  isLoading,
+  responseData,
 }) => {
-  const [responseData, setResponseData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-   //Solo para mensajes AI (llama al backend)
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!isAI || !isSend) return;
-      try {
-        setLoading(true);
-        const data = await fetchChatResponse(content);
-        setResponseData(data);
-      } catch (error) {
-        console.error("Error obteniendo respuesta:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [content, isAI,isSend]);
   if (isAI) {
     const handleDragStart = (e: React.DragEvent) => {
-      if (type === "diagram") {
+      if (responseData) {
         e.dataTransfer.setData(
           "application/json",
-          JSON.stringify({ id, type, label: content, diagramData })
+          JSON.stringify({
+            id,
+            diagramData: responseData
+          })
         );
       }
     };
 
     const handleDoubleClick = () => {
-      if (type === "diagram") {
+      if (responseData) {
         const event = new CustomEvent("addDiagramToDashboard", {
           detail: { id, type, label: content, diagramData },
         });
@@ -55,7 +40,7 @@ const ChatMessage: FC<ChatMessageProps> = ({
     return (
       <div
         className="flex items-start gap-3"
-        draggable={type === "diagram"}
+        draggable={!!responseData}
         onDragStart={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
@@ -85,9 +70,32 @@ const ChatMessage: FC<ChatMessageProps> = ({
           </div>
 
           {/* Contenido dinámico */}
-             <div className="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary max-w-md shadow-sm">
-            {loading ? (
-              <p className="text-sm text-gray-500">⏳ Generando respuesta...</p>
+          <div
+            className="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary w-full max-w-4xl shadow-sm overflow-hidden">
+            {isLoading ? (
+              <div className="flex flex-col items-center space-y-2">
+                {/* Spinner con segmentos de colores */}
+                <div className="w-14 h-14 relative animate-spin">
+                  {[
+                    "#00936B",
+                    "#00C588",
+                    "#66DCAE",
+                    "#36A2EB",
+                    "#5BB1E6",
+                    "#8FC6F0"
+                  ].map((color, index) => (
+                    <div
+                      key={index}
+                      className="absolute top-0 left-1/2 w-1 h-1/3 origin-bottom rounded"
+                      style={{
+                        backgroundColor: color,
+                        transform: `rotate(${index * 45}deg) translateY(-50%)`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-500 font-medium">🤖 Generando respuesta...</span>
+              </div>
             ) : responseData ? (
               <MessageContent data={responseData} />
             ) : (

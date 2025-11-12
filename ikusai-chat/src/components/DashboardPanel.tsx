@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { ResizableBox } from "react-resizable";
 import 'react-resizable/css/styles.css';
 import '../css/DashboardCanva.css'
+import MessageContent from "./responseChatComponents/ComponentRender";
 import {
   BarChart,
   Bar,
@@ -20,11 +21,11 @@ interface DashboardCanvasProps {
 
 interface Widget {
   id: string;
-  title: string;
+  type: string;
+  label: string;
+  diagramData: any;
   x: number;
   y: number;
-  type: "chart" | "card" | "diagram";
-  diagramData?: any;
   width: number;
   height: number;
 }
@@ -60,33 +61,34 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   };
 
   const handleMouseUp = () => setIsPanning(false);
-  // Calcula ancho y alto dinámico según widgets para permitir scroll
-  const canvasWidth = Math.max(2000, ...widgets.map(w => w.x + w.width));
-  const canvasHeight = Math.max(2000, ...widgets.map(w => w.y + w.height));
 
   const handleZoomIn = () => setZoom(z => Math.min(z + 0.1, 2));
   const handleZoomOut = () => setZoom(z => Math.max(z - 0.1, 0.5));
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const data = e.dataTransfer.getData("application/json");
-    if (data) {
+    try {
+      const data = e.dataTransfer.getData("application/json");
+      if (!data) return;
+
       const parsed = JSON.parse(data);
-      if (parsed.type === "diagram") {
-        setWidgets(prev => [
-          ...prev,
-          {
-            id: parsed.id,
-            title: parsed.label,
-            x: 100 + Math.random() * 300,
-            y: 100 + Math.random() * 150,
-            type: "diagram",
-            diagramData: parsed.diagramData,
-            width: 300,
-            height: 200,
-          },
-        ]);
-      }
+      const { id, type, label, diagramData } = parsed;
+
+      setWidgets((prev) => [
+        ...prev,
+        {
+          id: id || crypto.randomUUID(),
+          type: type || "diagram",
+          label: label || "Nuevo elemento",
+          diagramData: diagramData || {},
+          x: 50 + prev.length * 30,
+          y: 50 + prev.length * 30,
+          width: 400,
+          height: 300,
+        },
+      ]);
+    } catch (error) {
+      console.error(" Error al procesar el drop:", error);
     }
   };
 
@@ -94,15 +96,24 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
 
   useEffect(() => {
-    const listener = (event: any) => {
-      const { id, label, diagramData } = event.detail;
-      setWidgets(prev => [
+   const handleAddFromEvent = (event: any) => {
+      const { id, type, label, diagramData } = event.detail;
+     setWidgets((prev) => [
         ...prev,
-        { id, title: label, x: 200, y: 150, type: "diagram", diagramData, width: 300, height: 200 },
+        {
+          id: id || crypto.randomUUID(),
+          type: type || "diagram",
+          label: label || "Nuevo elemento",
+          diagramData: diagramData || {},
+          x: 50 + prev.length * 30,
+          y: 50 + prev.length * 30,
+          width: 400,
+          height: 300,
+        },
       ]);
     };
-    window.addEventListener("addDiagramToDashboard", listener);
-    return () => window.removeEventListener("addDiagramToDashboard", listener);
+    window.addEventListener("addDiagramToDashboard", handleAddFromEvent);
+    return () => window.removeEventListener("addDiagramToDashboard", handleAddFromEvent);
   }, []);
 
   return (
@@ -163,8 +174,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                   <button onClick={() => handleRemoveWidget(widget.id)} className="text-red-500 hover:text-red-700">✖</button>
 
                   <ResizableBox
-                    width={widget.width}
-                    height={widget.height}
+
                     minConstraints={[150, 100]}
                     maxConstraints={[600, 400]}
                     resizeHandles={["se"]}
@@ -175,23 +185,11 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                       );
                     }}
                   >
-                    {widget.type === "diagram" ? (
-                      <div className="w-full h-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={widget.diagramData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="value" fill="#10B981" radius={[6, 6, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    ) : (
-                      <div className="w-64 h-32 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-700 dark:text-emerald-300">
-                        👥 Usuarios Activos
-                      </div>
-                    )}
+                    {widget.diagramData ? (
+                      <MessageContent data={widget.diagramData} />
+                  ) : (
+                    <p className="text-gray-500">Sin datos</p>
+                  )}
                   </ResizableBox>
                 </div>
               </Draggable>
