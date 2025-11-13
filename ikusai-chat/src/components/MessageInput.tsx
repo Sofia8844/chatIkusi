@@ -66,7 +66,7 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGene
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Type your message here..."
-          className="w-full py-3 pl-4 pr-12 rounded-lg bg-white dark:bg-zinc-800 border border-light-border dark:border-dark-border focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow"
+        className="w-full py-3 pl-4 pr-12 rounded-xl bg-white border border-gray-200  shadow-[0_8px_24px_rgba(15,15,15,0.35)] hover:shadow-[0_8px_24px_rgba(72,239,128,0.35)] focus:shadow-[0_10px_28px_rgba(72,239,128,0.45)] focus:ring-2 focus:ring-green-200    focus:outline-none transition-all duration-300"
         />
         <button
           type="submit"

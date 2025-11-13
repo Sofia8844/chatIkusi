@@ -2,17 +2,8 @@ import Draggable from "react-draggable";
 import React, { useRef, useState, useEffect } from "react";
 import { ResizableBox } from "react-resizable";
 import 'react-resizable/css/styles.css';
-import '../css/DashboardCanva.css'
-import MessageContent from "./responseChatComponents/ComponentRender";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
+import '../css/DashboardCanva.css';
+import ChartDashboard from "./dashboardComponents/ChartsDashboard";
 
 interface DashboardCanvasProps {
   isActive: boolean;
@@ -61,7 +52,6 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   };
 
   const handleMouseUp = () => setIsPanning(false);
-
   const handleZoomIn = () => setZoom(z => Math.min(z + 0.1, 2));
   const handleZoomOut = () => setZoom(z => Math.max(z - 0.1, 0.5));
 
@@ -96,9 +86,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
 
   useEffect(() => {
-   const handleAddFromEvent = (event: any) => {
+    const handleAddFromEvent = (event: any) => {
       const { id, type, label, diagramData } = event.detail;
-     setWidgets((prev) => [
+      setWidgets((prev) => [
         ...prev,
         {
           id: id || crypto.randomUUID(),
@@ -148,12 +138,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* Contenedor interno que se mueve y escala */}
-        <div className="canvas-grid relative"
-          style={{
-            transform: `scale(${zoom})`,
-          }}
-        >
+        <div className="canvas-grid relative" style={{ transform: `scale(${zoom})` }}>
           {widgets.map(widget => {
             const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
             return (
@@ -166,30 +151,41 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
               >
                 <div
                   ref={nodeRef}
-                  className="absolute bg-white dark:bg-zinc-900 border border-light-border dark:border-dark-border rounded-xl shadow-lg p-4 hover:shadow-xl transition-all"
+                  className="absolute border-2 border-blue-400 rounded-lg p-2 shadow-md hover:shadow-lg transition-all bg-white dark:bg-zinc-900"
                 >
-                  <h3 className="font-semibold mb-3 text-light-text-primary dark:text-dark-text-primary">
-                    {widget.title}
-                  </h3>
-                  <button onClick={() => handleRemoveWidget(widget.id)} className="text-red-500 hover:text-red-700">✖</button>
+                  <div className="flex justify-between mb-2">
+                    <h3 className="font-semibold text-light-text-primary dark:text-dark-text-primary">
+                      {widget.label}
+                    </h3>
+                    <button
+                      onClick={() => handleRemoveWidget(widget.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      ✖
+                    </button>
+                  </div>
 
                   <ResizableBox
-
+                    width={widget.width}
+                    height={widget.height}
                     minConstraints={[150, 100]}
-                    maxConstraints={[600, 400]}
-                    resizeHandles={["se"]}
-                    className="p-4"
+                    resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
+                    className="relative border border-blue-300 rounded-md"
                     onResizeStop={(_, data) => {
                       setWidgets(prev =>
-                        prev.map(w => (w.id === widget.id ? { ...w, width: data.size.width, height: data.size.height } : w))
+                        prev.map(w =>
+                          w.id === widget.id
+                            ? { ...w, width: data.size.width, height: data.size.height }
+                            : w
+                        )
                       );
                     }}
                   >
                     {widget.diagramData ? (
-                      <MessageContent data={widget.diagramData} />
-                  ) : (
-                    <p className="text-gray-500">Sin datos</p>
-                  )}
+                      <ChartDashboard data={widget.diagramData} />
+                    ) : (
+                      <p className="text-gray-500 text-center py-10">Sin datos</p>
+                    )}
                   </ResizableBox>
                 </div>
               </Draggable>
@@ -198,21 +194,18 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
         </div>
       </div>
 
-      {/* Controles de zoom y modo */}
+      {/* Controles */}
       <div className="fixed bottom-10 left-[45%] transform -translate-x-1/2 flex items-center gap-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg z-50 border border-light-border dark:border-dark-border">
         <div className="flex gap-3">
-          <button onClick={handleZoomOut}
-            className="bg-emerald-700 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-110"
-          >
+          <button onClick={handleZoomOut} className="bg-emerald-700 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-110">
             <span className="material-icons text-xl">zoom_out</span>
           </button>
-          <button onClick={handleZoomIn}
-            className=" bg-emerald-700 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-110"
-          >            <span className="material-icons text-xl">zoom_in</span>
+          <button onClick={handleZoomIn} className="bg-emerald-700 hover:bg-blue-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-110">
+            <span className="material-icons text-xl">zoom_in</span>
           </button>
           <button
             title={mode === "move" ? "Modo mover" : "Modo seleccionar"}
-            className={`${mode === "move" ? "bg-emerald-700 hover:bg-blue-700" : "bg-blue-700  hover:bg-emerald-700"
+            className={`${mode === "move" ? "bg-emerald-700 hover:bg-blue-700" : "bg-blue-700 hover:bg-emerald-700"
               } text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform duration-200 hover:scale-110`}
             onClick={() => setMode(mode === "move" ? "select" : "move")}
           >

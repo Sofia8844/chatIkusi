@@ -13,7 +13,7 @@ interface Props {
     };
 }
 
-export default function ChartRenderer({ data }: Props) {
+export default function ChartDashboard({ data }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const chartRef = useRef<Chart | null>(null);
 
@@ -94,18 +94,6 @@ export default function ChartRenderer({ data }: Props) {
 
     return (
         <div className="w-full flex flex-col items-center space-y-6">
-            {/* Texto superior fuera del card */}
-            {data.answer && (
-                <div className="w-full max-w-3xl text-start px-6">
-                    <p
-                        className="text-[17px] text-gray-800 dark:text-gray-100 leading-relaxed 
-                   tracking-normal font-[400] antialiased" >
-                        {data.answer}
-                    </p>
-                </div>
-            )
-            }
-
             {/* Card del gráfico */}
             <div className="w-full max-w-3xl bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-md transition-all duration-300 flex flex-col items-center">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 text-center">
@@ -116,17 +104,6 @@ export default function ChartRenderer({ data }: Props) {
                     <canvas ref={canvasRef} className="w-full h-full" />
                 </div>
             </div>
-
-            {/* Texto inferior fuera del card */}
-            {
-                data.details && (
-                    <div className="w-full max-w-3xl text-center px-6">
-                        <p className=" text-[17px]  text-gray-800  dark:text-gray-300 leading-relaxed tracking-normal font-[400] antialiased">
-                            💬 <strong>Interpretación del gráfico:</strong> {data.details}
-                        </p>
-                    </div>
-                )
-            }
         </div >
 
 

@@ -105,7 +105,8 @@ const getDataChat = async (content: string) =>{
   return (
     <main className="flex-1 flex flex-col bg-chat-gradient-light dark:bg-chat-gradient-dark">
       <ChatHeader title="IkusAI Chat" isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
-      <div className="flex-1 px-6 pb-6 space-y-6 overflow-y-auto">
+      <div className="flex-1 flex justify-center px-6 pb-6 space-y-6 overflow-y-auto ">
+           <div className="w-full max-w-3xl space-y-6 pb-24">
         {chatSections.map((section) => (
           <div key={section.id} className="space-y-6">
             <div className="text-center my-4">
@@ -119,7 +120,11 @@ const getDataChat = async (content: string) =>{
           </div>
         ))}
       </div>
-      <div className="p-4 border-t border-light-border dark:border-dark-border bg-background-light dark:bg-background-dark">
+            </div>
+
+      <div className="sticky bottom-0 p-6 border-t border-light-border dark:border-dark-border 
+               bg-background-light/70
+               backdrop-blur-md shadow-md">
         <MessageInput isActive={isActive} quickActions={quickActions} onSend={handleSendMessage}  onGenerateDashboard={onGenerateDashboard}/>
       </div>
     </main>

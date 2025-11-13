@@ -9,7 +9,7 @@ interface Props {
     columns?: string[];
     rows?: any[][];
     details?: string;
-    natural_language_summary?: string;
+    answer?: string;
     mapping?: { x_key: string; y_key: string };
   };
 }
