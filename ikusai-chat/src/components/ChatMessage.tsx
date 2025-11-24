@@ -40,7 +40,7 @@ const ChatMessage: FC<ChatMessageProps> = ({
     return (
       <div
         className="flex items-start gap-3"
-        draggable={!!responseData}
+        draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph"}
         onDragStart={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >

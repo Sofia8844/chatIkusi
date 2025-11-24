@@ -61,7 +61,7 @@ const quickActions: QuickAction[] = [
     id: 'chat',
     icon: 'chat',
     label: 'Chat Normal',
-    message: 'Necesito más detalles sobre la campaña de marketing.',
+    message: '',
   },
 ]
 
@@ -83,7 +83,7 @@ const getInitialDarkMode = (): boolean => {
 }
 
 const App = () => {
-    // ✨ Estado compartido del chat
+    // Estado compartido del chat
   const [chatSections, setChatSections] = useState<ChatSection[]>([
     {
       id: 'chat-today',
