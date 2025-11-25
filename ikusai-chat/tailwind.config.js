@@ -30,7 +30,22 @@ export default {
         'ai-chat-bubble-gradient-light': 'linear-gradient(135deg, #E6F3EC 0%, #F5FBF8 100%)',
         'ai-chat-bubble-gradient-dark': 'linear-gradient(135deg, #102A20 0%, #15392A 100%)',
       },
+keyframes: {
+    perimeter: {
+      "0%": { "stroke-dashoffset": "900" },
+      "100%": { "stroke-dashoffset": "0" }
     },
+    shimmer: {
+      "0%": { backgroundPosition: "-200% 0" },
+      "100%": { backgroundPosition: "200% 0" }
+    }
+  },
+
+animation: {
+  perimeter: "perimeter 8s linear infinite",
+    shimmer: "shimmer 3s linear infinite",
+},
+    }
   },
   plugins: [],
 }

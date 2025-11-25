@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatContainer from "./ChatContainer";
 import type { QuickAction,ChatSection  } from "../types/chat";
+import type { UserProfile } from '../types/auth'
 
 interface DraggableChatProps {
   quickActions: QuickAction[];
@@ -10,6 +11,8 @@ interface DraggableChatProps {
   isActive: boolean;
   chatSections: ChatSection[];
   setChatSections: React.Dispatch<React.SetStateAction<ChatSection[]>>;
+   currentUser: UserProfile
+  
 }
 
 const TOP_GAP = 30;
@@ -40,7 +43,9 @@ const DraggableChat: React.FC<DraggableChatProps> = ({
   onGenerateDashboard,
   isActive,
   chatSections,
-   setChatSections
+   setChatSections,
+     currentUser
+
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -122,8 +127,10 @@ const DraggableChat: React.FC<DraggableChatProps> = ({
                 onToggleTheme={onToggleTheme}
                 onGenerateDashboard={onGenerateDashboard}
                 isActive={isActive}
-                  chatSections={chatSections}
+                chatSections={chatSections}
                  setChatSections={setChatSections}
+                 currentUser={currentUser}
+
               />
             </div>
           )}

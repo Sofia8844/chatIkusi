@@ -6,9 +6,11 @@ import DashboardCanva from "./components/DashboardPanel";
 import type {
   ChatHistorySection,
   QuickAction,
-  ChatSection
-} from './types/chat'
+  ChatSection} from './types/chat'
+import type { UserProfile } from './types/auth'; 
 import ChatContainer from './components/ChatContainer';
+import Login from './components/Login';
+
 const historySections: ChatHistorySection[] = [
   {
     id: 'today',
@@ -91,11 +93,12 @@ const App = () => {
       messages: [
         {
           id: 'message-1',
-          author: 'AI Assistant',
+          author: 'Ikusito',
           timestamp: '10:30 AM',
-          content: '¡Hola! ¿En qué puedo ayudarle hoy?',
+          content: '¡Hola! Soy Ikusito y estoy listo para ayudarte. ¿En qué puedo apoyar hoy al equipo Ikusi?',
           isAI: true,
-          avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAIZCmYMZ9_aJOi5pTg3T5Ntwj-Fi9erZXdUDr5Je1z8U9Kb7mmxW_I6SYTBgYpC50dq_-9OGZ3ZrVPxpg1uG6-VakLuxcTQpCVV7BfrMaTDy7bKrhZfVLyDQF0-oyElN18njlmjUFgJXWVyRPUVATFQMD1aR29XSf89Y4_avBBwwHBylE1pOE5goaM-twUJcdXF_eaFUkPZF6qJsI2pINsAN3CYHsmgovqD7tZ7fX0Y19LzptnhAixdAmCVNv5XcigW_mGI-_JcRY',
+          avatarUrl:'/src/icons/icons8-bot-200.png'
+          //avatarUrl: 'https://img.icons8.com/?size=100&id=59023&format=png&color=000000',
         },
       ],
     },
@@ -103,7 +106,9 @@ const App = () => {
 //const [chatSections, setChatSections] = useState<ChatSection[]>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
   const [showDashboard, setShowDashboard] = useState(false);
-const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
 
 const handleToggleSidebar = () => {
   setIsSidebarCollapsed((prev) => !prev);
@@ -151,15 +156,22 @@ const handleToggleSidebar = () => {
   const handleToggleTheme = () => {
     setIsDarkMode((prev) => !prev)
   }
+   const handleLogout = () => {
+    setChatSections(chatSections);
+    setShowDashboard(false);
+    setCurrentUser(null);
+  }
   
   const handleToggleDashboard = () => {
     setShowDashboard((prev) => !prev);
   };
 
-
+  if (!currentUser) {
+    return <Login onLogin={setCurrentUser} />;
+  }
   return (
-
      <div className="flex h-screen transition-all duration-500 ease-in-out overflow-hidden">
+     
       <Sidebar sections={historySections}   isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar} />
 
@@ -183,7 +195,9 @@ const handleToggleSidebar = () => {
             onGenerateDashboard={handleToggleDashboard}
             isActive={showDashboard}     
             chatSections={chatSections}
-             setChatSections={setChatSections}
+            setChatSections={setChatSections}
+            currentUser={currentUser}
+
 
      />
         </div>
@@ -196,7 +210,7 @@ const handleToggleSidebar = () => {
           isActive={showDashboard}
           chatSections={chatSections}
           setChatSections={setChatSections}
-
+          currentUser={currentUser}
         />
       )}
          {/* Área de tablero interactivo */}

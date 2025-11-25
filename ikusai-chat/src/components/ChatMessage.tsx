@@ -38,26 +38,29 @@ const ChatMessage: FC<ChatMessageProps> = ({
     };
 
     return (
+      
       <div
-        className="flex items-start gap-3"
+        className="flex items-start gap-3 transition-transform duration-200 hover:scale-[1.03]"
         draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph"}
         onDragStart={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
-        <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+
+
+        <div className="w-12 h-12 rounded-full
+                flex items-center justify-center overflow-hidden 
+                shadow-[0_0_0_4px_rgba(72,239,128,0.3)] hover:scale-105 transition-transform cursor-pointer">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={`${author} avatar`}
-              className="w-6 h-6 object-contain"
+              className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
-            <span className="text-sm font-semibold text-light-text-primary dark:text-dark-text-primary">
-              AI
-            </span>
+            <span className="text-white font-bold text-lg select-none">AI</span>
           )}
         </div>
-
+   
         <div>
           {/* Cabecera del mensaje */}
           <div className="flex items-baseline gap-2">
@@ -73,29 +76,42 @@ const ChatMessage: FC<ChatMessageProps> = ({
           <div
             className="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary w-full max-w-4xl shadow-sm overflow-hidden">
             {isLoading ? (
-              <div className="flex flex-col items-center space-y-2">
-                {/* Spinner con segmentos de colores */}
-                <div className="w-14 h-14 relative animate-spin">
-                  {[
-                    "#00936B",
-                    "#00C588",
-                    "#66DCAE",
-                    "#36A2EB",
-                    "#5BB1E6",
-                    "#8FC6F0"
-                  ].map((color, index) => (
-                    <div
-                      key={index}
-                      className="absolute top-0 left-1/2 w-1 h-1/3 origin-bottom rounded"
-                      style={{
-                        backgroundColor: color,
-                        transform: `rotate(${index * 45}deg) translateY(-50%)`,
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500 font-medium">🤖 Generando respuesta...</span>
-              </div>
+              
+  <div className="relative  w-64 h-20 rounded-xl bg-white border border-transparent flex items-center justify-center overflow-visible">
+
+  {/* Borde animado  */}
+  <svg
+    className="absolute inset-0 w-full h-full overflow-visible"
+    width="100%"
+    height="100%"
+  >
+    <rect
+      x="2"
+      y="2"
+      width="100%"
+      height="100%"
+      rx="12"
+      ry="12"
+      fill="none"
+      stroke="rgb(64, 163, 184)"
+      strokeWidth="2"
+      strokeDasharray="200"
+      className="animate-perimeter"
+      style={{ filter: "drop-shadow(0 0 6px rgba(99,102,241,0.8))" }}
+    />
+  </svg>
+
+  {/* Texto */}
+  <p className="relative text-gray-700 font-bold text-sm">
+       🤖 Generando respuesta...
+    <span
+      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shimmer"
+      style={{ backgroundSize: "200% 100%" }}
+    ></span>
+  </p>
+</div>
+              
+
             ) : responseData ? (
               <MessageContent data={responseData} />
             ) : (
