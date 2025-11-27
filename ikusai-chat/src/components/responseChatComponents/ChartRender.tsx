@@ -118,7 +118,7 @@ export default function ChartRenderer({ data }: Props) {
             </div>
 
             {/* Texto inferior fuera del card */}
-            {
+            {/*
                 data.details && (
                     <div className="w-full max-w-3xl text-center px-6">
                         <p className=" text-[17px]  text-gray-800  dark:text-gray-300 leading-relaxed tracking-normal font-[400] antialiased">
@@ -126,7 +126,7 @@ export default function ChartRenderer({ data }: Props) {
                         </p>
                     </div>
                 )
-            }
+            */}
         </div >
 
 

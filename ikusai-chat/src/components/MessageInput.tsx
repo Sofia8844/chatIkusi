@@ -3,8 +3,7 @@ import type { QuickAction } from '../types/chat'
 
 interface MessageInputProps {
   onSend(message: string): void
-  quickActions?: QuickAction[],
-  onGenerateDashboard(): void // ✅ nuevo prop
+  quickActions?: QuickAction[],// nuevo prop
   isActive: Boolean
 }
 
@@ -26,7 +25,7 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGene
   }
 
   const handleQuickAction = (action: QuickAction) => {
-    // ✅ Si el botón es "Generar Dashboard", llama la función especial
+    // Si el botón es "Generar Dashboard", llama la función especial
     if (action.id === 'generate-dashboard' && !isActive) {
       onGenerateDashboard()
       return

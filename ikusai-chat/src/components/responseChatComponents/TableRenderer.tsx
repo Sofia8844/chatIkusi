@@ -32,34 +32,41 @@ export default function TableRenderer({ data }: Props) {
   });
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
-      <table className="min-w-full text-sm text-left">
-        <thead className="bg-gray-100 dark:bg-zinc-700">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-4 py-2 font-semibold text-gray-700 dark:text-gray-300"
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
+<div className="w-full max-w-3xl max-h-80  overflow-auto rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+  <table className="w-full text-xs text-left border-collapse">
+    <thead className="bg-[#2674C7] text-white">
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th
+              key={header.id}
+              className="px-2 py-1 font-medium text-left tracking-wide"
+            >
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
           ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-t dark:border-zinc-700">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-2 text-gray-800 dark:text-gray-200">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
+        </tr>
+      ))}
+    </thead>
+    <tbody className="bg-white dark:bg-zinc-800">
+      {table.getRowModel().rows.map((row) => (
+        <tr
+          key={row.id}
+          className="border-b border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
+        >
+          {row.getVisibleCells().map((cell) => (
+            <td
+              key={cell.id}
+              className="px-2 py-1 text-gray-800 dark:text-gray-200 whitespace-nowrap"
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
   );
 }

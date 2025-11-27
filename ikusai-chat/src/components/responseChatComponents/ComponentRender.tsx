@@ -1,4 +1,5 @@
-import ChartRenderer from "./ChartRender";
+//import ChartRenderer from "./ChartRender";
+import ChartRenderer from "./ChartRenderHig";
 import TableRenderer from "./TableRenderer";
 import ParagraphRenderer from "./ParagraphRenderer";
 
