@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef,useImperativeHandle, forwardRef } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import '../../css/viewDataTable.css';
@@ -19,9 +19,12 @@ interface Props {
 }
 
 
-export default function ChartRenderer({ data }: Props) {
-    const chartComponentRef = useRef<any>(null);
-
+const ChartDashboard = forwardRef((props: Props, ref) => {
+    const {data} = props;
+    const chartComponentRef = useRef<HighchartsReact>(null);
+    useImperativeHandle(ref, () => ({
+         chart: chartComponentRef.current?.chart
+    }));
     const xKey = data.mapping?.x_key || data.columns[0];
     const yKey = data.mapping?.y_key || data.columns[1];
 
@@ -238,50 +241,22 @@ export default function ChartRenderer({ data }: Props) {
         return () => clearTimeout(timer);
     }, [data]);
 
-
     return (
-        <div className="w-full flex flex-col items-center space-y-6">
-            {/* Texto superior fuera del card */}
-            {data.answer && (
-                <div className="w-full max-w-3xl text-start px-6">
-                    <p
-                        className="text-[17px] text-gray-800 dark:text-gray-100 leading-relaxed 
-                   tracking-normal font-[400] antialiased" >
-                        {data.answer}
-                    </p>
-                </div>
-            )
-            }
 
-            {/* Card del gráfico */}
-            <div className="w-full max-w-3xl bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-md transition-all duration-300 flex flex-col items-center">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 text-center">
-                    📊 Visualización generada por el asistente
-                </h3>
-
-                <div className="relative w-full flex justify-center items-center">
+                <div className="relative w-full h-full flex justify-center items-center">
                     {/*<canvas ref={canvasRef} className="w-full h-full" />*/}
                     <HighchartsReact
                         highcharts={Highcharts}
                         options={options}
                         ref={chartComponentRef}
-                        className="w-full h-full" containerProps={{ style: { height: data.type === "pie" || data.type === "doughnut" ? "320px" : "420px", width: "100%" } }}
+                        className="w-full h-full"
+                         containerProps={{ style: { width: "100%", height: "100%" } }}
 
                     />
                 </div>
-            </div>
 
-            {/* Texto inferior fuera del card */}
-            {/*
-                data.details && (
-                    <div className="w-full max-w-3xl text-center px-6">
-                        <p className=" text-[17px]  text-gray-800  dark:text-gray-300 leading-relaxed tracking-normal font-[400] antialiased">
-                            💬 <strong>Interpretación del gráfico:</strong> {data.details}
-                        </p>
-                    </div>
-                )
-            */}
-        </div >
 
     );
-}
+});
+
+export default ChartDashboard;

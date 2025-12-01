@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { ResizableBox } from "react-resizable";
 import 'react-resizable/css/styles.css';
 import '../css/DashboardCanva.css';
-import ChartDashboard from "./dashboardComponents/ChartsDashboard";
+import ChartDashboard from "./dashboardComponents/ChartsDashboardHig";
 
 interface DashboardCanvasProps {
   isActive: boolean;
@@ -19,6 +19,7 @@ interface Widget {
   y: number;
   width: number;
   height: number;
+  chartRef?: React.RefObject<any>;
 }
 
 const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) => {
@@ -69,12 +70,13 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
         {
           id: id || crypto.randomUUID(),
           type: type || "diagram",
-          label: label || "Nuevo elemento",
+          label: label || `Diagrama${+1}`,
           diagramData: diagramData || {},
           x: 50 + prev.length * 30,
           y: 50 + prev.length * 30,
-          width: 400,
-          height: 300,
+          width: 450,
+          height: 450,
+          chartRef: React.createRef() // <-- asignamos ref
         },
       ]);
     } catch (error) {
@@ -97,8 +99,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
           diagramData: diagramData || {},
           x: 50 + prev.length * 30,
           y: 50 + prev.length * 30,
-          width: 400,
-          height: 300,
+          width: 450,
+          height: 450,
+          chartRef: React.createRef() // <-- asignamos ref
         },
       ]);
     };
@@ -168,9 +171,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                   <ResizableBox
                     width={widget.width}
                     height={widget.height}
-                    minConstraints={[150, 100]}
+                    minConstraints={[200, 150]}
                     resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
-                    className="relative border border-blue-300 rounded-md"
+                    className="relative border border-x-purple-600 rounded-md"
                     onResizeStop={(_, data) => {
                       setWidgets(prev =>
                         prev.map(w =>
@@ -179,10 +182,15 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                             : w
                         )
                       );
+
+                        if (widget.chartRef?.current?.chart) {
+                          widget.chartRef.current.chart.reflow();
+                        }
+
                     }}
                   >
                     {widget.diagramData ? (
-                      <ChartDashboard data={widget.diagramData} />
+                      <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />
                     ) : (
                       <p className="text-gray-500 text-center py-10">Sin datos</p>
                     )}
