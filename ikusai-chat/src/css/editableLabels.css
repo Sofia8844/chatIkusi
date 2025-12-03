@@ -1,0 +1,5 @@
+.ProseMirror:focus {
+  outline: none; /* quita el borde negro */
+  border: 2px solid #4ade80; /* verde-400 */
+  border-radius: 0.375rem;   /* rounded-md */
+}

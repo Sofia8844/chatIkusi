@@ -4,6 +4,8 @@ import { ResizableBox } from "react-resizable";
 import 'react-resizable/css/styles.css';
 import '../css/DashboardCanva.css';
 import ChartDashboard from "./dashboardComponents/ChartsDashboardHig";
+import EditableTitle from "./dashboardComponents/EditableLabels"
+import DashboardPDFGenerator from "./dashboardComponents/DashboardPDFGenerator";
 
 interface DashboardCanvasProps {
   isActive: boolean;
@@ -25,13 +27,15 @@ interface Widget {
 const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) => {
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const canvasRef = useRef<HTMLDivElement>(null);
-
+  const [activeWidget, setActiveWidget] = useState(null);
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [zoom, setZoom] = useState(1);
   const [mode, setMode] = useState<"select" | "move">("select");
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [editingWidgetId, setEditingWidgetId] = useState('');
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   const onMousedown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mode === "move") {
@@ -68,9 +72,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
       setWidgets((prev) => [
         ...prev,
         {
-          id: id || crypto.randomUUID(),
+          id: crypto.randomUUID(),
           type: type || "diagram",
-          label: label || `Diagrama${+1}`,
+          label: label || `Nuevo Diagrama`,
           diagramData: diagramData || {},
           x: 50 + prev.length * 30,
           y: 50 + prev.length * 30,
@@ -86,10 +90,16 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
-
+  const updateWidgetLabel = (id: string, newLabel: string) => {
+    setWidgets(prev =>
+      prev.map(w => w.id === id ?
+        { ...w, label: newLabel } : w)
+    );
+  };
   useEffect(() => {
     const handleAddFromEvent = (event: any) => {
       const { id, type, label, diagramData } = event.detail;
+      setActiveWidget(null);
       setWidgets((prev) => [
         ...prev,
         {
@@ -108,7 +118,11 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
     window.addEventListener("addDiagramToDashboard", handleAddFromEvent);
     return () => window.removeEventListener("addDiagramToDashboard", handleAddFromEvent);
   }, []);
-
+  useEffect(() => {
+    const close = () => setActiveWidget(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  });
   return (
     <div
       className={`relative flex-1 min-h-screen transition-all duration-700 ${isActive ? "visible opacity-100" : "invisible opacity-0"}`}
@@ -117,9 +131,14 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
     >
       {/* Cabecera */}
       <div className="p-4 border-b border-light-border dark:border-dark-border flex justify-between items-center">
-        <h2 className="text-xl font-bold text-light-text-primary dark:text-dark-text-primary">
+
+       <h2 className="text-xl font-bold text-light-text-primary dark:text-dark-text-primary">
           Tablero Interactivo
         </h2>
+        
+    {/* Exportar PDF */}
+
+      <DashboardPDFGenerator widgets={widgets} dashboardRef={dashboardRef} />
         <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
           Arrastra los elementos libremente
         </p>
@@ -141,7 +160,8 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div className="canvas-grid relative" style={{ transform: `scale(${zoom})` }}>
+        <div    ref={dashboardRef}
+ className="canvas-grid relative" style={{ transform: `scale(${zoom})` }}>
           {widgets.map(widget => {
             const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
             return (
@@ -153,27 +173,64 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                 cancel=".react-resizable-handle"
               >
                 <div
+                                id={`widget-${widget.id}`}
                   ref={nodeRef}
-                  className="absolute border-2 border-blue-400 rounded-lg p-2 shadow-md hover:shadow-lg transition-all bg-white dark:bg-zinc-900"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveWidget(widget.id)
+                  }}
+                  className={`absolute border-2 rounded-lg p-2 shadow-md transition-all bg-white dark:bg-zinc-900
+    ${activeWidget === widget.id ? "border-blue-500" : "border-2"}
+  `}
                 >
-                  <div className="flex justify-between mb-2">
-                    <h3 className="font-semibold text-light-text-primary dark:text-dark-text-primary">
-                      {widget.label}
-                    </h3>
-                    <button
+                  {activeWidget === widget.id && (
+                    <div className="absolute -top-10 right-0 flex gap-2 
+                bg-white dark:bg-zinc-800 
+                px-3 py-2 rounded-xl border z-50
+                shadow-[0_10px_12px_rgba(22,204,88,0.6)]">
+                      <button
+                        onClick={() => alert("Duplicar")}
+                        className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg"
+                      >
+                        <img src='/src/icons/icons8-duplicate-90.png' className="w-7 h-7"></img>
+                      </button>
+
+                      <button
+                        onClick={() => handleRemoveWidget(widget.id)}
+                        className="p-1 hover:bg-green-100 dark:hover:bg-green-800 rounded-l"
+                      >
+                        <img src='/src/icons/icons8-trash-512.png' className="w-7 h-7"></img>
+                      </button>
+                    </div>
+                  )}
+                    <div className="flex justify-center mb-2">
+                      {editingWidgetId ? (
+                        <EditableTitle
+                          value={widget.label}
+                          onChange={(newTitle) => updateWidgetLabel(widget.id, newTitle)}
+                        />
+                      ) :
+                        <h3
+                          onClick={() => setEditingWidgetId(widget.id)}
+                        
+                          className="font-semibold justify-center text-light-text-primary dark:text-dark-text-primary">
+                          {widget.label}
+                        </h3>
+                      }
+                      {/*  <button
                       onClick={() => handleRemoveWidget(widget.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       ✖
-                    </button>
-                  </div>
+                    </button> */}
+                    </div>
 
                   <ResizableBox
                     width={widget.width}
                     height={widget.height}
                     minConstraints={[200, 150]}
                     resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
-                    className="relative border border-x-purple-600 rounded-md"
+                    className="relative border border-transparent hover:border-green-500 rounded-md"
                     onResizeStop={(_, data) => {
                       setWidgets(prev =>
                         prev.map(w =>
@@ -183,9 +240,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                         )
                       );
 
-                        if (widget.chartRef?.current?.chart) {
-                          widget.chartRef.current.chart.reflow();
-                        }
+                      if (widget.chartRef?.current?.chart) {
+                        widget.chartRef.current.chart.reflow();
+                      }
 
                     }}
                   >

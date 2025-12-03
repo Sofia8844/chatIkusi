@@ -12,13 +12,23 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
+    "@tiptap/extension-bubble-menu": "^3.11.1",
+    "@tiptap/extension-color": "^3.11.1",
+    "@tiptap/extension-floating-menu": "^3.11.1",
+    "@tiptap/extension-text-align": "^3.11.1",
+    "@tiptap/extension-text-style": "^3.11.1",
+    "@tiptap/react": "^3.11.1",
+    "@tiptap/starter-kit": "^3.11.1",
     "highcharts": "^12.4.0",
     "highcharts-react-official": "^3.2.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-draggable": "^4.5.0",
     "react-resizable": "^3.0.5",
-    "recharts": "^3.3.0"
+    "recharts": "^3.3.0",
+    "tippy.js": "^6.3.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
