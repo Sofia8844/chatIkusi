@@ -6,7 +6,7 @@ export default {
     extend: {
       colors: {
         primary: '#3DD883',
-        'background-light': '#F8FAFC',
+        "background-light": "#f6f8f7",
         'background-dark': '#18181B',
         'light-accent': '#E6F3EC',
         'dark-accent': '#1F2937',
@@ -16,12 +16,17 @@ export default {
         'dark-text-primary': '#F8FAFC',
         'light-text-secondary': '#64748B',
         'dark-text-secondary': '#94A3B8',
+        "pastel-green": "#e0f3e9",
+         "pastel-purple": "#e9e7f3"
       },
       fontFamily: {
         display: ['Roboto', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '0.5rem',
+        lg: "0.75rem",
+         xl: "1rem",
+         full: "9999px"
       },
       backgroundImage: {
         'chat-gradient-light': 'linear-gradient(180deg, #F0FFF7 0%, #FFFFFF 100%)',

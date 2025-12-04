@@ -128,6 +128,13 @@ const handleToggleSidebar = () => {
   }, [isDarkMode])
 
   useEffect(() => {
+        //Usuario prueba
+    setCurrentUser(  {
+    id: 'cesar-villamil',
+    name: 'Cesar Villamil',
+    role: 'gerente_general',
+    title: 'Gerente General',
+  });
     if (typeof window === 'undefined') {
       return
     }
@@ -151,6 +158,7 @@ const handleToggleSidebar = () => {
 
     mediaQuery.addListener(handleChange)
     return () => mediaQuery.removeListener(handleChange)
+
   }, [])
 
   const handleToggleTheme = () => {
@@ -168,7 +176,7 @@ const handleToggleSidebar = () => {
 
   if (!currentUser) {
     return <Login onLogin={setCurrentUser} />;
-  }
+  } 
   return (
      <div className="flex h-screen transition-all duration-500 ease-in-out overflow-hidden">
      
