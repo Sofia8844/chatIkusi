@@ -1,9 +1,15 @@
 import type { FC } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface WelcomeSectionProps {
      username: string
 }
  const WelcomeSection: FC<WelcomeSectionProps> = ({ username = "Usuario" }) =>{
+   const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/editPage"); // ← aquí navega
+  };
   return (
     <div className="flex flex-col gap-0 px-4 sm:px-6 lg:px-10">
       <div className="flex flex-wrap justify-between items-start gap-4 p-4 mt-8">
@@ -17,7 +23,7 @@ interface WelcomeSectionProps {
         </div>
 
         <div className="flex flex-1 gap-3 flex-wrap justify-start sm:justify-end">
-          <button className="rounded-lg h-12 px-5 bg-primary text-text-primary-light text-base font-bold">
+          <button onClick={handleClick} className="rounded-lg h-12 px-5 bg-primary text-text-primary-light text-base font-bold">
             Crear un diseño
           </button>
 

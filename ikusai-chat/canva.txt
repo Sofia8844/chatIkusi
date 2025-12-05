@@ -1,0 +1,41 @@
+Crea un editor de diseño estilo Canva completamente funcional en React con typescript, usando solo librerías open-source como Konva. Debe incluir:
+
+1. **Sidebar con herramientas**:
+   - My Designs (guardar/cargar diseños)
+   - Templates (plantillas prediseñadas)
+   - Text (añadir y editar texto)
+   - Photos (añadir imágenes)
+   - Icons (añadir iconos)
+   - Upload (subir imágenes propias)
+   - Background (cambiar fondo)
+   - Layer (manejo de capas y orden de elementos)
+   - Colors (paleta y colores de texto/fondo)
+
+2. **Toolbar**:
+   - Download (exportar a PNG/JPG)
+   - Add Page (añadir páginas al diseño)
+   - Undo/Redo
+   - Zoom
+
+3. **Lienzo**:
+   - Permitir múltiples páginas.
+   - Cada elemento (texto, imagen, icono) debe ser seleccionable, movible y redimensionable.
+   - Capacidad de eliminar elementos.
+   - Soporte para capas (traer adelante, enviar atrás).
+
+4. **Gestión de estado**:
+   - Usa React Context o Zustand para manejar el estado global de los diseños y elementos.
+
+5. **Componentes**:
+   - Cada herramienta debe ser un componente separado.
+   - App.tsx debe integrar todo y renderizar el editor completo.
+   - Proporciona ejemplos de interacción: agregar texto, imágenes, iconos, cambiar fondo, usar plantillas, exportar diseño.
+6. **Estilos**
+   -Los estiloso son con tailwind, genera un degradado de c olores verdes y azules claros
+7. **Restricciones**:
+   - No usar librerías de pago.
+   - Todo debe ser open-source.
+   - Código limpio, modular y funcional.
+
+Todos los componentes deben quedar en la ruta
+IKUSI-CHAT\chatIkusi\ikusai-chat\src\components\editorCanva\editPage

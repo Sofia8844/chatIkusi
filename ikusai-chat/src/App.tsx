@@ -10,6 +10,7 @@ import type {
 import type { UserProfile } from './types/auth'; 
 import ChatContainer from './components/ChatContainer';
 import Login from './components/Login';
+import { useNavigate } from 'react-router-dom';
 
 const historySections: ChatHistorySection[] = [
   {
@@ -103,6 +104,7 @@ const App = () => {
       ],
     },
   ])
+    const navigate = useNavigate();
 //const [chatSections, setChatSections] = useState<ChatSection[]>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
   const [showDashboard, setShowDashboard] = useState(false);
@@ -171,7 +173,8 @@ const handleToggleSidebar = () => {
   }
   
   const handleToggleDashboard = () => {
-    setShowDashboard((prev) => !prev);
+   setShowDashboard((prev) => !prev);
+    //navigate("/editMenu")
   };
 
   if (!currentUser) {
