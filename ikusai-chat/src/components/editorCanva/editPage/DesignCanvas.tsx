@@ -3,6 +3,7 @@ import { Image as KonvaImage, Layer, Rect, Stage, Text, Transformer } from "reac
 import type Konva from "konva";
 import { useDesign } from "./DesignProvider";
 import type { CanvasElement, IconElement, ImageElement, TextElement } from "./types";
+import DashboardCanvas from "../../DashboardPanel";
 
 const PAGE_RATIO = 11 / 8.5; // Proporción similar a una hoja carta
 
@@ -165,6 +166,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     updateElement,
     deleteSelected,
     zoom,
+    showDashboard,       // <- nuevo
+    closeDashboard,      // <- nuevo
   } = useDesign();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -350,11 +353,16 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
       ref={containerRef}
       className="relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"
     >
+            {showDashboard ? (
+          // Dashboard ocupará exactamente el mismo espacio que el Stage
+            <DashboardCanvas isActive={true} onClose={closeDashboard} />
+        ) : (
       <div
         className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
         ref={canvasWrapperRef}
         style={{ width: size.width, height: size.height }}
       >
+
         <Stage
           width={size.width}
           height={size.height}
@@ -380,17 +388,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
           }}
         >
           <Layer ref={layerRef}>
-            <Rect
-              width={size.width}
-              height={size.height}
-              cornerRadius={18}
-              stroke="#e2e8f0"
-              strokeWidth={1}
-              name="canvas-background"
-              onClick={handleBackgroundClick}
-              onTap={handleBackgroundClick}
-              {...backgroundProps}
-            />
             {currentPage.elements.map((element) => (
               <ElementNode
                 key={element.id}
@@ -423,6 +420,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
             />
           </Layer>
         </Stage>
+  
         {editingElement && editingBox && (
           <div
             className="absolute rounded-lg border border-emerald-200/70 bg-white/60 px-2 py-1 shadow-sm"
@@ -467,6 +465,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
           </div>
         )}
       </div>
+            )}
     </div>
   );
 };

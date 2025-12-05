@@ -35,6 +35,10 @@ interface DesignContextValue {
   canRedo: boolean;
   zoom: number;
   setZoom: (value: number) => void;
+  showDashboard: boolean;
+  openDashboard: () => void;
+  closeDashboard: () => void;
+  toggleDashboard: () => void;
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null);
@@ -102,9 +106,17 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
     zoom: 1,
     savedDesigns: [],
   });
+  //Pizarra
+  
+  // nuevo estado para mostrar dashboard
+  const [showDashboard, setShowDashboard] = useState(false);
+
   const [past, setPast] = useState<EditorState[]>([]);
   const [future, setFuture] = useState<EditorState[]>([]);
-
+  // helpers
+  const openDashboard = () => setShowDashboard(true);
+  const closeDashboard = () => setShowDashboard(false);
+  const toggleDashboard = () => setShowDashboard(v => !v);
   const pushHistory = useCallback((snapshot: EditorState) => {
     setPast((history) => [...history.slice(-14), cloneState(snapshot)]);
     setFuture([]);
@@ -408,6 +420,11 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       canRedo: future.length > 0,
       zoom: state.zoom,
       setZoom,
+        // nuevos
+      showDashboard,
+      openDashboard,
+      closeDashboard,
+      toggleDashboard,
     }),
     [
       state,
@@ -435,6 +452,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       past.length,
       future.length,
       setZoom,
+      showDashboard
     ]
   );
 

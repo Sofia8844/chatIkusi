@@ -57,11 +57,11 @@ const EditorSidebar: React.FC = () => {
     <aside
       data-preserve-selection
       className={`flex flex-shrink-0 rounded-3xl bg-white/40 p-3 shadow-xl backdrop-blur-xl border border-white/50 transition-[width] duration-200 ${
-        isToolOpen ? "w-[430px]" : "w-[220px]"
+        isToolOpen ? "w-[430px]" : "w-[120px]"
       }`}
     >
       <div className="flex gap-3 w-full">
-        <div className="flex w-32 flex-col gap-2 rounded-2xl border border-white/60 bg-white/60 p-2 shadow-sm">
+        <div className="flex w-30 flex-col gap-2 rounded-2xl border border-white/60 bg-white/60 p-2 shadow-sm">
           {tools.map((tool) => (
             <button
               key={tool.id}

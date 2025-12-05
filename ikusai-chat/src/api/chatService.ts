@@ -16,7 +16,7 @@ const API_BASE_URL =
     //"http://192.168.50.125:8010";
 //const ASK_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/api/ask`; // primera version
 const ASK_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/webhook/ask`; // segunda version
-export async function fetchChatResponse(query: string, userRole: string): Promise<ChatResponse["data"]> {
+export async function fetchChatResponse(query: string, userRole: string,userId:string, chatId:string): Promise<ChatResponse["data"]> {
     try {
         const username = "ikusi_frontend";
         const password = "Ikusi2025*";
@@ -28,7 +28,7 @@ export async function fetchChatResponse(query: string, userRole: string): Promis
             headers: { "Content-Type": "application/json" ,
              "Authorization": `Basic ${authValue}`},
            // headers: { "Content-Type": "application/json"},
-            body: JSON.stringify({ user_query: query, user_rol: userRole })
+            body: JSON.stringify({ user_query: query, user_rol: userRole, user_id: userId, chat_id: chatId })
         });
         if (!response.ok) {
             throw new Error(`Error HTTP"${response.status}`);

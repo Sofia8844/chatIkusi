@@ -7,7 +7,8 @@ import EditorToolbar from "./EditorToolbar";
 import PageNavigation from "./PageNavigation";
 
 const ExampleActions: React.FC = () => {
-  const { addTextElement, addIconElement, addImageElement, changeBackground, applyTemplate } =
+  const { addTextElement, addIconElement, addImageElement, changeBackground, applyTemplate,
+    } =
     useDesign();
 
   return (
@@ -53,6 +54,9 @@ const ExampleActions: React.FC = () => {
 };
 
 const EditorContent: React.FC = () => {
+    const {  showDashboard } =
+    useDesign();
+
   const stageRef = useRef<Konva.Stage>(null);
 
   const handleDownload = (format: "png" | "jpg") => {
@@ -82,6 +86,9 @@ const EditorContent: React.FC = () => {
               <PageNavigation />
             </div>
           </div>
+
+
+      
         </div>
       </div>
     </div>

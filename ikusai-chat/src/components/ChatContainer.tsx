@@ -30,7 +30,9 @@ const ChatContainer: FC<ChatContainerProps> = ({
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const getDataChat = async (content: string) => {
     try {
-      const data = await fetchChatResponse(content, currentUser.role); // Llamada a la API
+      const user_id = "1";
+      const chat_id = "1";
+      const data = await fetchChatResponse(content, currentUser.role,user_id,chat_id); // Llamada a la API
       return data;
     } catch (error) {
       console.error("Error obteniendo respuesta:", error);

@@ -5,14 +5,12 @@ import 'react-resizable/css/styles.css';
 import '../css/DashboardCanva.css';
 import ChartDashboard from "./dashboardComponents/ChartsDashboardHig";
 import EditableTitle from "./dashboardComponents/EditableLabels"
-import DashboardPDFGenerator from "./dashboardComponents/DashboardPDFGenerator";
-
+import HeaderDashboard from "./dashboardComponents/headers"
 interface DashboardCanvasProps {
   isActive: boolean;
   onClose: () => void;
 }
-
-interface Widget {
+export interface Widget {
   id: string;
   type: string;
   label: string;
@@ -129,28 +127,8 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
-      {/* Cabecera */}
-      <div className="p-4 border-b border-light-border dark:border-dark-border flex justify-between items-center">
-
-       <h2 className="text-xl font-bold text-light-text-primary dark:text-dark-text-primary">
-          Tablero Interactivo
-        </h2>
-        
-    {/* Exportar PDF */}
-
-      <DashboardPDFGenerator widgets={widgets} dashboardRef={dashboardRef} />
-        <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-          Arrastra los elementos libremente
-        </p>
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300"
-        >
-          <span className="material-icons">arrow_back</span>
-          Volver al chat
-        </button>
-      </div>
-
+      {/* Cabecera 
+      <HeaderDashboard widgets={widgets} dashboardRef={dashboardRef}/> */}
       {/* Lienzo */}
       <div
         ref={canvasRef}
@@ -160,8 +138,8 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div    ref={dashboardRef}
- className="canvas-grid relative" style={{ transform: `scale(${zoom})` }}>
+        <div ref={dashboardRef}
+          className="canvas-grid relative" style={{ transform: `scale(${zoom})` }}>
           {widgets.map(widget => {
             const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
             return (
@@ -173,7 +151,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                 cancel=".react-resizable-handle"
               >
                 <div
-                                id={`widget-${widget.id}`}
+                  id={`widget-${widget.id}`}
                   ref={nodeRef}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -203,27 +181,27 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                       </button>
                     </div>
                   )}
-                    <div className="flex justify-center mb-2">
-                      {editingWidgetId ? (
-                        <EditableTitle
-                          value={widget.label}
-                          onChange={(newTitle) => updateWidgetLabel(widget.id, newTitle)}
-                        />
-                      ) :
-                        <h3
-                          onClick={() => setEditingWidgetId(widget.id)}
-                        
-                          className="font-semibold justify-center text-light-text-primary dark:text-dark-text-primary">
-                          {widget.label}
-                        </h3>
-                      }
-                      {/*  <button
+                  <div className="flex justify-center mb-2">
+                    {editingWidgetId ? (
+                      <EditableTitle
+                        value={widget.label}
+                        onChange={(newTitle) => updateWidgetLabel(widget.id, newTitle)}
+                      />
+                    ) :
+                      <h3
+                        onClick={() => setEditingWidgetId(widget.id)}
+
+                        className="font-semibold justify-center text-light-text-primary dark:text-dark-text-primary">
+                        {widget.label}
+                      </h3>
+                    }
+                    {/*  <button
                       onClick={() => handleRemoveWidget(widget.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       ✖
                     </button> */}
-                    </div>
+                  </div>
 
                   <ResizableBox
                     width={widget.width}
