@@ -74,22 +74,15 @@ const EditorContent: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-140px)] w-full max-w-[1440px] gap-4 overflow-y-auto p-5 text-slate-800">
+    <div className="flex min-h-[calc(100vh-140px)] w-full max-w-[1440px] gap-4 overflow-y-auto p-5 pb-8 text-slate-800">
       <EditorSidebar />
       <div className="flex flex-1 flex-col gap-4">
         <EditorToolbar onDownload={handleDownload} />
         <ExampleActions />
-        <div className="relative flex-1 min-h-[640px] pb-16">
+        <div className="relative flex-1 min-h-[640px] pb-6">
           <DesignCanvas stageRef={stageRef} />
-          <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-            <div className="pointer-events-auto">
-              <PageNavigation />
-            </div>
-          </div>
-
-
-      
         </div>
+        <PageNavigation />
       </div>
     </div>
   );

@@ -275,6 +275,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     selectElement(null);
   };
 
+  useEffect(() => {
+    if (!showDashboard) return;
+    stopEditing(true);
+    selectElement(null);
+  }, [selectElement, showDashboard, stopEditing]);
+
   const editableRef = useRef<HTMLDivElement>(null);
   const editingElement = useMemo(() => {
     if (!editingState || !currentPage) return null;
@@ -348,124 +354,152 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     );
   }
 
+  const canvasWrapperStyle = { width: size.width, height: size.height };
+  const scaledContentStyle = {
+/*     width: size.width,
+    height: size.height, */
+    transform: `scale(${zoom})`,
+    transformOrigin: "top left",
+  };
+
+  const stageCanvas = (
+    <div
+      className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
+      ref={canvasWrapperRef}
+      style={canvasWrapperStyle}
+    >
+      <Stage
+        width={size.width}
+        height={size.height}
+        ref={stageRef}
+        scaleX={zoom}
+        scaleY={zoom}
+        className={editingState ? "cursor-text" : "cursor-crosshair"}
+        onMouseDown={(e) => {
+          const target = e.target;
+          const clickedOnStage = target === e.target.getStage();
+          const clickedOnBackground = target?.getAttr("name") === "canvas-background";
+          if (clickedOnStage || clickedOnBackground) {
+            handleBackgroundClick();
+          }
+        }}
+        onTouchStart={(e) => {
+          const target = e.target;
+          const clickedOnStage = target === e.target.getStage();
+          const clickedOnBackground = target?.getAttr("name") === "canvas-background";
+          if (clickedOnStage || clickedOnBackground) {
+            handleBackgroundClick();
+          }
+        }}
+      >
+        <Layer ref={layerRef}>
+          <Rect
+            name="canvas-background"
+            width={size.width}
+            height={size.height}
+            {...backgroundProps}
+          />
+          {currentPage.elements.map((element) => (
+            <ElementNode
+              key={element.id}
+              element={element}
+              isSelected={selectedElement?.id === element.id}
+              isEditing={editingState?.id === element.id}
+              onSelect={() => selectElement(element.id)}
+              onChange={(attrs) => updateElement(element.id, attrs)}
+              onEditRequest={startEditing}
+            />
+          ))}
+          <Transformer
+            ref={transformerRef}
+            rotateEnabled
+            enabledAnchors={[
+              "top-left",
+              "top-right",
+              "bottom-left",
+              "bottom-right",
+              "top-center",
+              "bottom-center",
+              "middle-left",
+              "middle-right",
+            ]}
+            anchorSize={8}
+            borderStroke="#22c55e"
+            borderStrokeWidth={1.5}
+            anchorStroke="#0ea5e9"
+            anchorFill="#0ea5e9"
+          />
+        </Layer>
+      </Stage>
+
+      {editingElement && editingBox && (
+        <div
+          className="absolute rounded-lg border border-emerald-200/70 bg-white/60 px-2 py-1 shadow-sm"
+          style={{
+            top: editingBox.y,
+            left: editingBox.x,
+            width: editingBox.width,
+            minHeight: editingBox.height,
+            fontSize: editingElement.fontSize * zoom,
+            fontFamily: editingElement.fontFamily,
+            color: editingElement.fill ?? "#0f172a",
+            fontStyle: editingElement.fontStyle?.includes("italic") ? "italic" : "normal",
+            fontWeight: editingElement.fontStyle?.includes("bold") ? "700" : "400",
+            textAlign: editingElement.align ?? "left",
+            lineHeight: 1.4,
+            transformOrigin: "top left",
+            pointerEvents: "auto",
+          }}
+        >
+          <div
+            ref={editableRef}
+            contentEditable
+            suppressContentEditableWarning
+            className="w-full whitespace-pre-wrap outline-none"
+            data-preserve-selection
+            onInput={(e) => {
+              const value = e.currentTarget.innerText.replace(/\u00a0/g, " ");
+              setEditingState((prev) => (prev ? { ...prev, value } : prev));
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                stopEditing(false);
+              }
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                stopEditing(true);
+              }
+            }}
+            onBlur={() => stopEditing(true)}
+          />
+        </div>
+      )}
+    </div>
+  );
+
+  const dashboardCanvas = (
+    <div
+      className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
+
+    >
+        <DashboardCanvas isActive onClose={closeDashboard} />
+      <button
+        type="button"
+        onClick={closeDashboard}
+        className="absolute right-4 top-4 rounded-full bg-emerald-600 px-3 py-1 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+      >
+        Volver al lienzo
+      </button>
+    </div>
+  );
+
   return (
     <div
       ref={containerRef}
       className="relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"
     >
-            {showDashboard ? (
-          // Dashboard ocupará exactamente el mismo espacio que el Stage
-            <DashboardCanvas isActive={true} onClose={closeDashboard} />
-        ) : (
-      <div
-        className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
-        ref={canvasWrapperRef}
-        style={{ width: size.width, height: size.height }}
-      >
-
-        <Stage
-          width={size.width}
-          height={size.height}
-          ref={stageRef}
-          scaleX={zoom}
-          scaleY={zoom}
-          className={editingState ? "cursor-text" : "cursor-crosshair"}
-          onMouseDown={(e) => {
-            const target = e.target;
-            const clickedOnStage = target === e.target.getStage();
-            const clickedOnBackground = target?.getAttr("name") === "canvas-background";
-            if (clickedOnStage || clickedOnBackground) {
-              handleBackgroundClick();
-            }
-          }}
-          onTouchStart={(e) => {
-            const target = e.target;
-            const clickedOnStage = target === e.target.getStage();
-            const clickedOnBackground = target?.getAttr("name") === "canvas-background";
-            if (clickedOnStage || clickedOnBackground) {
-              handleBackgroundClick();
-            }
-          }}
-        >
-          <Layer ref={layerRef}>
-            {currentPage.elements.map((element) => (
-              <ElementNode
-                key={element.id}
-                element={element}
-                isSelected={selectedElement?.id === element.id}
-                isEditing={editingState?.id === element.id}
-                onSelect={() => selectElement(element.id)}
-                onChange={(attrs) => updateElement(element.id, attrs)}
-                onEditRequest={startEditing}
-              />
-            ))}
-            <Transformer
-              ref={transformerRef}
-              rotateEnabled
-              enabledAnchors={[
-                "top-left",
-                "top-right",
-                "bottom-left",
-                "bottom-right",
-                "top-center",
-                "bottom-center",
-                "middle-left",
-                "middle-right",
-              ]}
-              anchorSize={8}
-              borderStroke="#22c55e"
-              borderStrokeWidth={1.5}
-              anchorStroke="#0ea5e9"
-              anchorFill="#0ea5e9"
-            />
-          </Layer>
-        </Stage>
-  
-        {editingElement && editingBox && (
-          <div
-            className="absolute rounded-lg border border-emerald-200/70 bg-white/60 px-2 py-1 shadow-sm"
-            style={{
-              top: editingBox.y,
-              left: editingBox.x,
-              width: editingBox.width,
-              minHeight: editingBox.height,
-              fontSize: editingElement.fontSize * zoom,
-              fontFamily: editingElement.fontFamily,
-              color: editingElement.fill ?? "#0f172a",
-              fontStyle: editingElement.fontStyle?.includes("italic") ? "italic" : "normal",
-              fontWeight: editingElement.fontStyle?.includes("bold") ? "700" : "400",
-              textAlign: editingElement.align ?? "left",
-              lineHeight: 1.4,
-              transformOrigin: "top left",
-              pointerEvents: "auto",
-            }}
-          >
-            <div
-              ref={editableRef}
-              contentEditable
-              suppressContentEditableWarning
-              className="w-full whitespace-pre-wrap outline-none"
-              data-preserve-selection
-              onInput={(e) => {
-                const value = e.currentTarget.innerText.replace(/\u00a0/g, " ");
-                setEditingState((prev) => (prev ? { ...prev, value } : prev));
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  stopEditing(false);
-                }
-                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                  e.preventDefault();
-                  stopEditing(true);
-                }
-              }}
-              onBlur={() => stopEditing(true)}
-            />
-          </div>
-        )}
-      </div>
-            )}
+      {showDashboard ? dashboardCanvas : stageCanvas}
     </div>
   );
 };

@@ -117,6 +117,11 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
   const openDashboard = () => setShowDashboard(true);
   const closeDashboard = () => setShowDashboard(false);
   const toggleDashboard = () => setShowDashboard(v => !v);
+  const dispatchDashboardElement = (detail: Record<string, unknown>) => {
+    if (!showDashboard || typeof window === "undefined") return false;
+    window.dispatchEvent(new CustomEvent("addElementToDashboard", { detail }));
+    return true;
+  };
   const pushHistory = useCallback((snapshot: EditorState) => {
     setPast((history) => [...history.slice(-14), cloneState(snapshot)]);
     setFuture([]);
@@ -202,6 +207,20 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
   };
 
   const addTextElement = (value: string, fontSize = 26) => {
+    if (
+      dispatchDashboardElement({
+        type: "text",
+        label: value?.slice(0, 24) || "Texto",
+        text: value,
+        fontSize,
+        fontFamily: "Inter, system-ui, sans-serif",
+        fill: "#0f172a",
+        align: "left",
+      })
+    ) {
+      return;
+    }
+
     if (!currentPage) return;
     commit((draft) => {
       const page = draft.pages.find((p) => p.id === draft.currentPageId);
@@ -216,17 +235,26 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         y: 140 + page.elements.length * 12,
         width: 360,
         height: 80,
-      fontSize,
-      fontFamily: "Inter",
-      fontStyle: "normal",
-      fill: "#0f172a",
-      align: "left",
+        fontSize,
+        fontFamily: "Inter",
+        fontStyle: "normal",
+        fill: "#0f172a",
+        align: "left",
       });
       draft.selectedElementId = id;
     });
   };
 
   const addImageElement = (src: string, name = "Imagen") => {
+    if (
+      dispatchDashboardElement({
+        type: "image",
+        label: name,
+        src,
+      })
+    ) {
+      return;
+    }
     commit((draft) => {
       const page = draft.pages.find((p) => p.id === draft.currentPageId);
       if (!page) return;
@@ -247,6 +275,17 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
   };
 
   const addIconElement = (text: string) => {
+    if (
+      dispatchDashboardElement({
+        type: "icon",
+        label: text || "Ícono",
+        text,
+        fontSize: 56,
+        fill: "#0d9488",
+      })
+    ) {
+      return;
+    }
     commit((draft) => {
       const page = draft.pages.find((p) => p.id === draft.currentPageId);
       if (!page) return;

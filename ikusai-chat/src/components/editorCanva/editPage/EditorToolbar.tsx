@@ -30,7 +30,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
           Añadir página
         </button>
             <button
-          onClick={() => openDashboard("png")}
+          onClick={() => openDashboard()}
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow hover:scale-[1.01] transition"
         >
          Pizarra

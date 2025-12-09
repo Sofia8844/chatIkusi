@@ -4,6 +4,11 @@ import { useDesign } from "./DesignProvider";
 const PageNavigation: React.FC = () => {
   const { state, currentPage, setCurrentPage, addPage, duplicatePage, deletePage } = useDesign();
   const [openMenuId, setOpenMenuId] = React.useState<string | null>(null);
+  const navRef = React.useRef<HTMLDivElement>(null);
+  const [navBounds, setNavBounds] = React.useState<{ left: number | null; width: number | null }>({
+    left: null,
+    width: null,
+  });
 
   React.useEffect(() => {
     const closeMenu = () => setOpenMenuId(null);
@@ -11,9 +16,41 @@ const PageNavigation: React.FC = () => {
     return () => document.removeEventListener("click", closeMenu);
   }, []);
 
+  React.useLayoutEffect(() => {
+    const updateBounds = () => {
+      const parent = navRef.current?.parentElement;
+      if (!parent) return;
+      const rect = parent.getBoundingClientRect();
+      setNavBounds({ left: rect.left, width: rect.width });
+    };
+
+    updateBounds();
+
+    const parent = navRef.current?.parentElement;
+    const observer =
+      typeof ResizeObserver !== "undefined" && parent
+        ? new ResizeObserver(updateBounds)
+        : null;
+
+    if (observer && parent) {
+      observer.observe(parent);
+    }
+
+    window.addEventListener("resize", updateBounds);
+
+    return () => {
+      if (observer) observer.disconnect();
+      window.removeEventListener("resize", updateBounds);
+    };
+  }, []);
+
   return (
-    <div className="flex w-full justify-center">
-      <div className="flex max-w-5xl items-end gap-4 overflow-x-auto rounded-3xl border border-white/70 bg-white/80 px-5 py-4 shadow-2xl backdrop-blur">
+    <div
+      ref={navRef}
+      className="pointer-events-none fixed bottom-6 z-30"
+      style={{ left: navBounds.left ?? undefined, width: navBounds.width ?? undefined }}
+    >
+      <div className="pointer-events-auto flex w-full items-end gap-4 overflow-x-auto rounded-3xl border border-white/70 bg-white/90 px-5 py-4 shadow-lg backdrop-blur">
         {state.pages.map((page, index) => {
           const isActive = currentPage?.id === page.id;
           const isMenuOpen = openMenuId === page.id;
