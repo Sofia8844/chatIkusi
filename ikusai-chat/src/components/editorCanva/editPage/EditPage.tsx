@@ -1,15 +1,34 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import type Konva from "konva";
 import DesignCanvas from "./DesignCanvas";
 import { DesignProvider, useDesign } from "./DesignProvider";
 import EditorSidebar from "./EditorSidebar";
 import EditorToolbar from "./EditorToolbar";
 import PageNavigation from "./PageNavigation";
+import DraggableChat from '../../../components/DraggableChat'
+
+
 
 const ExampleActions: React.FC = () => {
   const { addTextElement, addIconElement, addImageElement, changeBackground, applyTemplate,
-    } =
+  } =
     useDesign();
+  const getInitialDarkMode = (): boolean => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+    try {
+      const stored = window.localStorage.getItem(storageKey)
+      if (stored) {
+        return stored === 'dark'
+      }
+    } catch {
+      // ignore storage errors and fall back to media query
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+  }
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
+
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/50 bg-white/60 px-4 py-3 shadow-sm backdrop-blur">
@@ -54,7 +73,7 @@ const ExampleActions: React.FC = () => {
 };
 
 const EditorContent: React.FC = () => {
-    const {  showDashboard } =
+  const { showDashboard } =
     useDesign();
 
   const stageRef = useRef<Konva.Stage>(null);
@@ -83,6 +102,15 @@ const EditorContent: React.FC = () => {
           <DesignCanvas stageRef={stageRef} />
         </div>
         <PageNavigation />
+    {/*  <DraggableChat
+          isDarkMode={isDarkMode}
+          onToggleTheme={handleToggleTheme}
+          onGenerateDashboard={handleToggleDashboard}
+          isActive={showDashboard}
+          chatSections={chatSections}
+          setChatSections={setChatSections}
+          currentUser={currentUser}
+        /> */}
       </div>
     </div>
   );

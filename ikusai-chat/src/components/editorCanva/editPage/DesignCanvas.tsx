@@ -275,12 +275,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     selectElement(null);
   };
 
-  useEffect(() => {
-    if (!showDashboard) return;
-    stopEditing(true);
-    selectElement(null);
-  }, [selectElement, showDashboard, stopEditing]);
-
   const editableRef = useRef<HTMLDivElement>(null);
   const editingElement = useMemo(() => {
     if (!editingState || !currentPage) return null;
