@@ -354,14 +354,9 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     );
   }
 
-  const canvasWrapperStyle = { width: size.width, height: size.height };
-  const scaledContentStyle = {
-/*     width: size.width,
-    height: size.height, */
-    transform: `scale(${zoom})`,
-    transformOrigin: "top left",
-  };
-
+  const scaledWidth = size.width * zoom;
+  const scaledHeight = size.height * zoom;
+  const canvasWrapperStyle = { width: scaledWidth, height: scaledHeight };
   const stageCanvas = (
     <div
       className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
@@ -369,8 +364,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
       style={canvasWrapperStyle}
     >
       <Stage
-        width={size.width}
-        height={size.height}
+        width={scaledWidth}
+        height={scaledHeight}
         ref={stageRef}
         scaleX={zoom}
         scaleY={zoom}

@@ -57,7 +57,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
           <input
             type="range"
             min={0.5}
-            max={2}
+            max={1}
             step={0.1}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
