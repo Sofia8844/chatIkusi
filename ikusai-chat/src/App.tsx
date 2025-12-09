@@ -53,20 +53,6 @@ const historySections: ChatHistorySection[] = [
 ]
 
 
-const quickActions: QuickAction[] = [
-  {
-    id: "generate-dashboard",
-    icon: 'dashboard',
-    label: 'Generar Dashboard',
-    message: 'Genera un dashboard con los KPIs clave del último trimestre.',
-  },
-  {
-    id: 'chat',
-    icon: 'chat',
-    label: 'Chat Normal',
-    message: '',
-  },
-]
 
 const storageKey = 'ikusai-theme'
 
@@ -104,6 +90,21 @@ const App = () => {
       ],
     },
   ])
+  
+const quickActions: QuickAction[] = [
+  {
+    id: "generate-dashboard",
+    icon: 'dashboard',
+    label: 'Generar Dashboard',
+    message: 'Genera un dashboard con los KPIs clave del último trimestre.',
+  },
+  {
+    id: 'chat',
+    icon: 'chat',
+    label: 'Chat Normal',
+    message: '',
+  },
+]
     const navigate = useNavigate();
 //const [chatSections, setChatSections] = useState<ChatSection[]>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
@@ -214,7 +215,6 @@ const handleToggleSidebar = () => {
         </div>
       ) : (
         <DraggableChat
-          quickActions={quickActions}
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
           onGenerateDashboard={handleToggleDashboard}
