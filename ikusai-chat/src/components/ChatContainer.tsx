@@ -80,7 +80,7 @@ const ChatContainer: FC<ChatContainerProps> = ({
 
     // 4Obtener respuesta de la IA
     try {
-      const data = await getDataChat(content); // llamado al backend
+      const data = await getDataChat(content); // llamado al backend respuest IA
 
       // Actualizar mensaje de IA con responseData completo
       setChatSections(prev => {

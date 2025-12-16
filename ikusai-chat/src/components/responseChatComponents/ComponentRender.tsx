@@ -2,6 +2,7 @@
 import ChartRenderer from "./ChartRenderHig";
 import TableRenderer from "./TableRenderer";
 import ParagraphRenderer from "./ParagraphRenderer";
+import ImageRenderer from "./ImageRender";
 
 
 interface Props {
@@ -11,12 +12,16 @@ interface Props {
     rows?: any[][];
     details?: string;
     answer?: string;
-    mapping?: { x_key: string; y_key: string };
+    mapping?: { x_key: string | string[]; y_key: string | string[] };
   };
+ setHasImages?: (flag: boolean) => void;
+    preview: string | null;
+  setPreview: (src: string | null) => void;
+
 }
 
 
-export default function MessageContent({ data }: Props) {
+export default function MessageContent({ data,setHasImages,setPreview,preview}: Props) {
    if (!data) return null;
   switch (data.type?.toLowerCase()) {
     case "bar":
@@ -27,6 +32,9 @@ export default function MessageContent({ data }: Props) {
       return <ChartRenderer data={data} />;
     case "table":
       return <TableRenderer data={data} />;
+    case "text_with_image":
+      return <ImageRenderer data={data} setHasImages={setHasImages} 
+    />;
     case "paragraph":
       return <ParagraphRenderer data={data} />;
     default:

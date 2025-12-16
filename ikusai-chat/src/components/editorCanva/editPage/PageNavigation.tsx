@@ -1,5 +1,5 @@
 import React from "react";
-import { useDesign } from "./DesignProvider";
+import { useDesign } from "../../../providers/DesignProvider";
 
 const PageNavigation: React.FC = () => {
   const { state, currentPage, setCurrentPage, addPage, duplicatePage, deletePage } = useDesign();

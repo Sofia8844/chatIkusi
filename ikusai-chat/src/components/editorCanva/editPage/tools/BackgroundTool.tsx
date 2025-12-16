@@ -1,6 +1,6 @@
 import React from "react";
 import { backgroundPalette } from "../constants";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const BackgroundTool: React.FC = () => {
   const { changeBackground } = useDesign();

@@ -1,6 +1,7 @@
 import Draggable from "react-draggable";
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { ResizableBox } from "react-resizable";
+import type{ Widget } from "../types/chat";
 import { Image as KonvaImage, Layer, Rect, Stage, Text as KonvaText, Transformer } from "react-konva";
 import type Konva from "konva";
 import "react-resizable/css/styles.css";
@@ -19,17 +20,6 @@ interface DashboardCanvasProps {
   onClose: () => void;
 }
 
-export interface Widget {
-  id: string;
-  type: string;
-  label: string;
-  diagramData: any;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  chartRef?: React.RefObject<any>;
-}
 
 const DASHBOARD_SIZE = 2000;
 
@@ -521,7 +511,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   });
   return (
     <div
-      className={`relative flex-1 min-h-screen transition-all duration-700 ${isActive ? "visible opacity-100" : "invisible opacity-0"}`}
+      className={`relative w-full h-full transition-all duration-700 ${isActive ? "visible opacity-100" : "invisible opacity-0"}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
@@ -530,7 +520,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
       {/* Lienzo */}
       <div
         ref={canvasRef}
-        className={`relative w-full h-[100vh] overflow-auto cursor-${mode === "move" ? (isPanning ? "grabbing" : "grab") : "default"}`}
+        className={`relative w-full h-full overflow-auto cursor-${mode === "move" ? (isPanning ? "grabbing" : "grab") : "default"}`}
         onMouseDown={onMousedown}
         onMouseMove={onMouseMove}
         onMouseUp={handleMouseUp}

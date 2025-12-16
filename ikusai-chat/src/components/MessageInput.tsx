@@ -1,5 +1,6 @@
 import { FC, FormEvent, useState } from 'react'
 import type { QuickAction } from '../types/chat'
+import { useNavigate } from "react-router-dom";
 
 interface MessageInputProps {
   onSend(message: string): void
@@ -9,6 +10,7 @@ interface MessageInputProps {
 
 const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGenerateDashboard,isActive}) => {
   const [message, setMessage] = useState('')
+  const navigate = useNavigate();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -27,13 +29,15 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGene
   const handleQuickAction = (action: QuickAction) => {
     // Si el botón es "Generar Dashboard", llama la función especial
     if (action.id === 'generate-dashboard' && !isActive) {
-      onGenerateDashboard()
+     // onGenerateDashboard()
+     navigate("/editMenu"); // ← aquí navega
       return
     }
     // Si no, envía el mensaje normal
     if(action.id === 'chat'){
       if(isActive){
-        onGenerateDashboard();
+        navigate("/editMenu"); // ← aquí navega
+        //onGenerateDashboard();
       } 
        sendMessage(action.message)
     }

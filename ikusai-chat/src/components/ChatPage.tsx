@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import DraggableChat from './components/DraggableChat'
 import DashboardCanva from "./components/DashboardPanel";
-
+import { adaptMessagesToSections } from '../adapter/chatSection.adapter';
 import type {
   ChatHistorySection,
   QuickAction,
-  ChatSection} from './types/chat'
-import type { UserProfile } from './types/auth'; 
+  ChatSection
+} from './types/chat'
+import type { UserProfile } from './types/auth';
 import ChatContainer from './components/ChatContainer';
 import Login from './components/Login';
 import { useNavigate } from 'react-router-dom';
+import { fectNewConversation, fetchChatHistory, fetchChatId } from '../api/chatService';
 
-const historySections: ChatHistorySection[] = [
+/* const historySections: ChatHistorySection[] = [
   {
     id: 'today',
     title: 'Hoy',
@@ -50,10 +52,7 @@ const historySections: ChatHistorySection[] = [
       },
     ],
   },
-]
-
-
-
+] */
 const storageKey = 'ikusai-theme'
 
 const getInitialDarkMode = (): boolean => {
@@ -71,30 +70,30 @@ const getInitialDarkMode = (): boolean => {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
 }
 
-const App = () => {  
-const quickActions: QuickAction[] = [
-  {
-    id: "generate-dashboard",
-    icon: 'dashboard',
-    label: 'Generar Dashboard',
-    message: 'Genera un dashboard con los KPIs clave del último trimestre.',
-  },
-  {
-    id: 'chat',
-    icon: 'chat',
-    label: 'Chat Normal',
-    message: '',
-  },
-]
+const chatPage = () => {
+  const quickActions: QuickAction[] = [
+    {
+      id: "generate-dashboard",
+      icon: 'dashboard',
+      label: 'Generar Dashboard',
+      message: 'Genera un dashboard con los KPIs clave del último trimestre.',
+    },
+    {
+      id: 'chat',
+      icon: 'chat',
+      label: 'Chat Normal',
+      message: '',
+    },
+  ]
 
-    const navigate = useNavigate();
-//const [chatSections, setChatSections] = useState<ChatSection[]>();
+  const navigate = useNavigate();
+  //const [chatSections, setChatSections] = useState<ChatSection[]>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
   const [showDashboard, setShowDashboard] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
-const [chatSections, setChatSections] = useState<ChatSection[]>([
+  const [chatSections, setChatSections] = useState<ChatSection[]>([
     {
       id: 'chat-today',
       label: 'Hoy',
@@ -105,15 +104,17 @@ const [chatSections, setChatSections] = useState<ChatSection[]>([
           timestamp: '10:30 AM',
           content: '¡Hola! Soy Ikusito y estoy listo para ayudarte. ¿En qué puedo apoyar hoy al equipo Ikusi?',
           isAI: true,
-          avatarUrl:'/src/icons/icons8-bot-200.png'
+          avatarUrl: '/src/icons/icons8-bot-200.png'
           //avatarUrl: 'https://img.icons8.com/?size=100&id=59023&format=png&color=000000',
         },
       ],
     },
   ])
-const handleToggleSidebar = () => {
-  setIsSidebarCollapsed((prev) => !prev);
-};
+  const [historySections, setHistorySections] = useState<ChatHistorySection[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => !prev);
+  };
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -129,13 +130,13 @@ const handleToggleSidebar = () => {
   }, [isDarkMode])
 
   useEffect(() => {
-        //Usuario prueba
-    setCurrentUser(  {
-    id: 'cesar-villamil',
-    name: 'Cesar Villamil',
-    role: 'gerente_general',
-    title: 'Gerente General',
-  });
+    //Usuario prueba
+    setCurrentUser({
+      id: 'cesar-villamil',
+      name: 'Cesar Villamil',
+      role: 'gerente_general',
+      title: 'Gerente General',
+    });
     if (typeof window === 'undefined') {
       return
     }
@@ -160,34 +161,63 @@ const handleToggleSidebar = () => {
     mediaQuery.addListener(handleChange)
     return () => mediaQuery.removeListener(handleChange)
 
-  }, [])
+  }, []);
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!currentUser) return;
+      const history = await fetchChatHistory(currentUser.id);
+      setHistorySections(history); // solo para mostrar en sidebar
+    }
+    loadHistory();
+  }, [currentUser]);
 
-  const handleToggleTheme = () => {
-    setIsDarkMode((prev) => !prev)
+const handleSelectConversation = async (chatId: string) => {
+  setCurrentChatId(chatId); // activamos la conversación seleccionada
+  try {
+    const messages = await fetchChatId(chatId); // trae ChatMessage[]
+    const sections = adaptMessagesToSections(messages); // conv. a ChatSection[]
+    setChatSections(sections);
+  } catch (error) {
+    console.error("Error cargando mensajes:", error);
   }
-   const handleLogout = () => {
-    setChatSections(chatSections);
-    setShowDashboard(false);
-    setCurrentUser(null);
-  }
-  
-  const handleToggleDashboard = () => {
-   setShowDashboard((prev) => !prev);
-    //navigate("/editMenu")
-  };
+};
+const handleToggleTheme = () => {
+  setIsDarkMode((prev) => !prev)
+}
+const handleLogout = () => {
+  setChatSections(chatSections);
+  setShowDashboard(false);
+  setCurrentUser(null);
+}
+const handleNewConversation = async () => {
+  const newChat = await fectNewConversation(currentUser.id);
 
-  if (!currentUser) {
-    return <Login onLogin={setCurrentUser} />;
-  } 
-  return (
-     <div className="flex h-screen transition-all duration-500 ease-in-out overflow-hidden">
-     
-      <Sidebar sections={historySections}   isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleSidebar} />
+  setCurrentChatId(newChat.conversation_id); // Activar nuevo chat
+  setChatSections([]);                       // Limpiar mensajes
 
-         {/* Chat + Dashboard en el mismo layout */}
-      <div className="flex h-screen  flex flex-1 h-full overflow-hidden transition-all duration-500">      
-        {/* Chat colapsable */}
+  // Opcional: recargar historial desde backend
+  const updatedHistory = await fetchChatHistory(currentUser.id);
+  setHistorySections(updatedHistory);
+};
+const handleToggleDashboard = () => {
+  setShowDashboard((prev) => !prev);
+  //navigate("/editMenu")
+};
+
+if (!currentUser) {
+  return <Login onLogin={setCurrentUser} />;
+}
+return (
+  <div className="flex h-screen transition-all duration-500 ease-in-out overflow-hidden">
+
+    <Sidebar sections={historySections} isCollapsed={isSidebarCollapsed}
+      onToggleCollapse={handleToggleSidebar} 
+      onSelectConversation={handleSelectConversation}
+      onNewConversation={handleNewConversation} />
+
+    {/* Chat + Dashboard en el mismo layout */}
+    <div className="flex h-screen  flex flex-1 h-full overflow-hidden transition-all duration-500">
+      {/* Chat colapsable */}
       {/* Chat fijo o draggable según estado *
       
       
@@ -239,30 +269,29 @@ const handleToggleSidebar = () => {
          */}
 
 
-          <div
-          className={`${
-            showDashboard
-              ? "w-1/4"
-              : "w-full flex h-screen transition-all duration-500 ease-in-out overflow-hidden"
+      <div
+        className={`${showDashboard
+            ? "w-1/4"
+            : "w-full flex h-screen transition-all duration-500 ease-in-out overflow-hidden"
           }`}
-        >
-          <ChatContainer
-            quickActions={quickActions}
-            isDarkMode={isDarkMode}
-            onToggleTheme={handleToggleTheme}
-            onGenerateDashboard={handleToggleDashboard}
-            isActive={showDashboard}     
-            chatSections={chatSections}
-            setChatSections={setChatSections}
-            currentUser={currentUser}
-     />
-        </div>
+      >
+        <ChatContainer
+          quickActions={quickActions}
+          isDarkMode={isDarkMode}
+          onToggleTheme={handleToggleTheme}
+          onGenerateDashboard={handleToggleDashboard}
+          isActive={showDashboard}
+          chatSections={chatSections}
+          setChatSections={setChatSections}
+          currentUser={currentUser}
+        />
+      </div>
 
     </div>
-  
-    </div>
 
-  )
+  </div>
+
+)
 }
 
-export default App
+export default chatPage;

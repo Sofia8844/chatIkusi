@@ -1,4 +1,4 @@
-import { useEffect, useRef,useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import '../../css/viewDataTable.css';
@@ -20,17 +20,28 @@ interface Props {
 
 
 const ChartDashboard = forwardRef((props: Props, ref) => {
-    const {data} = props;
+    const { data } = props;
     const chartComponentRef = useRef<HighchartsReact>(null);
     useImperativeHandle(ref, () => ({
-         chart: chartComponentRef.current?.chart
+        chart: chartComponentRef.current?.chart
     }));
-    const xKey = data.mapping?.x_key || data.columns[0];
-    const yKey = data.mapping?.y_key || data.columns[1];
+    /*     const xKey = data.mapping?.x_key || data.columns[0];
+        const yKey = data.mapping?.y_key || data.columns[1];
+    
+        const xIndex = data.columns.indexOf(xKey);
+        const yIndex = data.columns.indexOf(yKey); */
 
+    const xKey = Array.isArray(data.mapping?.x_key)
+        ? data.mapping.x_key[0] // primer valor
+        : data.mapping?.x_key || data.columns[0];
+
+    const yKey = Array.isArray(data.mapping?.y_key)
+        ? data.mapping.y_key
+        : [data.mapping?.y_key || data.columns[1]];
+
+    // índices
     const xIndex = data.columns.indexOf(xKey);
-    const yIndex = data.columns.indexOf(yKey);
-
+    const yIndex = yKey.map(key => data.columns.indexOf(key));
     // Labels dinámicos (incluye formato fecha)
     const categories = data.rows.map((r) => {
         const val = r[xIndex];
@@ -69,10 +80,12 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
 
     });
     // Valores dinámicos
-    const values = data.rows.map((r) => {
-        const num = parseFloat(r[yIndex]);
-        return isNaN(num) ? 0 : num;
-    });
+   const values = data.rows.map((r) => {
+        return yIndex.map((i) => {
+            const num = parseFloat(r[i]);
+            return isNaN(num) ? 0 : num;
+        })
+    })
     //Valores para diagramas circulares
     const seriesDataDoungh = data.rows.map((r) => ({
         name: r[xIndex] ? r[xIndex] : "",
@@ -89,6 +102,19 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
         bubble: "bubble",
     };
     const hcType = typeMap[data.type.toLowerCase()] || "column";
+         //Series
+    const series = hcType === "pie" || hcType === "doughnut"
+  ? [{
+      type: hcType as any,
+      name: data.details || "Datos",
+      data: seriesDataDoungh,
+      colorByPoint: true,
+    }]
+  : yIndex.map((i, idx) => ({
+      type: hcType as any,
+      name: data.mapping.y_key[idx],
+      data: values[idx],
+    }));
     // Activar 3D para todos los gráficos
     const options: Highcharts.Options = {
         chart: {
@@ -158,12 +184,8 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
                 marker: { enabled: true },
             },
         },
-        series: [
-            {
-                type: hcType as any,
-                name: data.details || "Datos",
-                data: hcType === "pie" || hcType === "doughnut" ? seriesDataDoungh : values,
-                colorByPoint: true,
+              series: series,
+
 
                 //colorByPoint: hcType === "pie",
                 /*colors:[ "#00936B", // verde profundo
@@ -185,16 +207,15 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
     "#66DCAE", // verde claro
     "#036F8A", // azul petróleo
     "#B083FF"  // lavanda pastel]*/
-            },
-        ],
+    
         exporting: {
             buttons: {
                 contextButton: {
                     menuItems: ['downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', 'viewData']
                 }
             },
-            showTable:false,
-             tableCaption: "Datos Graficos",
+            showTable: false,
+            tableCaption: "Datos Graficos",
 
         },
 
@@ -243,17 +264,17 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
 
     return (
 
-                <div className="relative w-full h-full flex justify-center items-center">
-                    {/*<canvas ref={canvasRef} className="w-full h-full" />*/}
-                    <HighchartsReact
-                        highcharts={Highcharts}
-                        options={options}
-                        ref={chartComponentRef}
-                        className="w-full h-full"
-                         containerProps={{ style: { width: "100%", height: "100%" } }}
+        <div className="relative w-full h-full flex justify-center items-center">
+            {/*<canvas ref={canvasRef} className="w-full h-full" />*/}
+            <HighchartsReact
+                highcharts={Highcharts}
+                options={options}
+                ref={chartComponentRef}
+                className="w-full h-full"
+                containerProps={{ style: { width: "100%", height: "100%" } }}
 
-                    />
-                </div>
+            />
+        </div>
 
 
     );

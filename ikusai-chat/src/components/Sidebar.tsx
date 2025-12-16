@@ -5,9 +5,10 @@ interface SidebarProps {
   sections: ChatHistorySection[]
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onNewConversation:() => void;
 }
 
-const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse }) => {
+const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse, onNewConversation }) => {
   return (
     <aside
       className={`transition-all duration-700 ease-in-out border-r border-light-border dark:border-dark-border bg-white dark:bg-zinc-900 flex flex-col p-4 ${
@@ -72,7 +73,9 @@ const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse }) =
 
       {/* Botón inferior */}
       {!isCollapsed && (
-        <button className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300">
+        <button 
+          onClick={onNewConversation}
+        className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors text-emerald-700 dark:text-emerald-300">
           <span className="material-icons text-emerald-500 dark:text-emerald-400">
             add
           </span>

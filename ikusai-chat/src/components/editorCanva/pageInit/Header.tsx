@@ -34,6 +34,7 @@ const Header: FC<HeaderProps> = ({ avatarUrl }) => {
           style={{
             backgroundImage: `url(${avatarUrl || "https://lh3.googleusercontent.com/ogw/..."}`
           }}
+          
         ></div>
       </div>
     </header>

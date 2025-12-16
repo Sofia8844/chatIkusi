@@ -1,5 +1,5 @@
 import React from "react";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const TemplatesTool: React.FC = () => {
   const { templates, applyTemplate } = useDesign();

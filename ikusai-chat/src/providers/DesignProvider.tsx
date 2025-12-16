@@ -1,11 +1,11 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { backgroundPalette, starterTemplates } from "./constants";
+import { backgroundPalette, starterTemplates } from "../components/editorCanva/editPage/constants";
 import type {
   CanvasElement,
   DesignPage,
   EditorState,
   TemplatePreset,
-} from "./types";
+} from "../components/editorCanva/editPage/types";
 
 interface DesignContextValue {
   state: EditorState;

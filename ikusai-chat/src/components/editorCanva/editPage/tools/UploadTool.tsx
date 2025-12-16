@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const UploadTool: React.FC = () => {
   const { addImageElement } = useDesign();

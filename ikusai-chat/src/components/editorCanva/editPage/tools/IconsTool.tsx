@@ -1,6 +1,6 @@
 import React from "react";
 import { iconPalette } from "../constants";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const IconsTool: React.FC = () => {
   const { addIconElement } = useDesign();

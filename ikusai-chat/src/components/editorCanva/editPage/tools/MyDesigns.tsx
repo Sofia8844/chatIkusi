@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const MyDesigns: React.FC = () => {
   const {

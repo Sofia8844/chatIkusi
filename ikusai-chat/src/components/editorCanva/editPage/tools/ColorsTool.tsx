@@ -1,5 +1,5 @@
 import React from "react";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const palette = ["#0f766e", "#0ea5e9", "#0ea5e9", "#34d399", "#22c55e", "#0f172a", "#f97316"];
 

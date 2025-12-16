@@ -22,11 +22,22 @@ interface Props {
 export default function ChartRenderer({ data }: Props) {
     const chartComponentRef = useRef<any>(null);
 
-    const xKey = data.mapping?.x_key || data.columns[0];
-    const yKey = data.mapping?.y_key || data.columns[1];
+    /*     const xKey = data.mapping?.x_key || data.columns[0];
+        const yKey = data.mapping?.y_key || data.columns[1];
+    
+        const xIndex = data.columns.indexOf(xKey);
+        const yIndex = data.columns.indexOf(yKey); */
+    const xKey = Array.isArray(data.mapping?.x_key)
+        ? data.mapping.x_key[0] // primer valor
+        : data.mapping?.x_key || data.columns[0];
 
+    const yKey = Array.isArray(data.mapping?.y_key)
+        ? data.mapping.y_key
+        : [data.mapping?.y_key || data.columns[1]];
+
+    // índices
     const xIndex = data.columns.indexOf(xKey);
-    const yIndex = data.columns.indexOf(yKey);
+    const yIndex = yKey.map(key => data.columns.indexOf(key));
 
     // Labels dinámicos (incluye formato fecha)
     const categories = data.rows.map((r) => {
@@ -66,10 +77,17 @@ export default function ChartRenderer({ data }: Props) {
 
     });
     // Valores dinámicos
+    /*   const values = data.rows.map((r) => {
+          const num = parseFloat(r[yIndex]);
+          return isNaN(num) ? 0 : num;
+      }); */
     const values = data.rows.map((r) => {
-        const num = parseFloat(r[yIndex]);
-        return isNaN(num) ? 0 : num;
-    });
+        return yIndex.map((i) => {
+            const num = parseFloat(r[i]);
+            return isNaN(num) ? 0 : num;
+        })
+    })
+
     //Valores para diagramas circulares
     const seriesDataDoungh = data.rows.map((r) => ({
         name: r[xIndex] ? r[xIndex] : "",
@@ -86,6 +104,20 @@ export default function ChartRenderer({ data }: Props) {
         bubble: "bubble",
     };
     const hcType = typeMap[data.type.toLowerCase()] || "column";
+        //Series
+    const series = hcType === "pie" || hcType === "doughnut"
+  ? [{
+      type: hcType as any,
+      name: data.details || "Datos",
+      data: seriesDataDoungh,
+      colorByPoint: true,
+    }]
+  : yIndex.map((i, idx) => ({
+      type: hcType as any,
+      name: data.mapping.y_key[idx],
+      data: values[idx],
+    }));
+
     // Activar 3D para todos los gráficos
     const options: Highcharts.Options = {
         chart: {
@@ -155,12 +187,7 @@ export default function ChartRenderer({ data }: Props) {
                 marker: { enabled: true },
             },
         },
-        series: [
-            {
-                type: hcType as any,
-                name: data.details || "Datos",
-                data: hcType === "pie" || hcType === "doughnut" ? seriesDataDoungh : values,
-                colorByPoint: true,
+        series: series,
 
                 //colorByPoint: hcType === "pie",
                 /*colors:[ "#00936B", // verde profundo
@@ -182,16 +209,14 @@ export default function ChartRenderer({ data }: Props) {
     "#66DCAE", // verde claro
     "#036F8A", // azul petróleo
     "#B083FF"  // lavanda pastel]*/
-            },
-        ],
         exporting: {
             buttons: {
                 contextButton: {
                     menuItems: ['downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', 'viewData']
                 }
             },
-            showTable:false,
-             tableCaption: "Datos Graficos",
+            showTable: false,
+            tableCaption: "Datos Graficos",
 
         },
 

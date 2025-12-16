@@ -1,9 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image as KonvaImage, Layer, Rect, Stage, Text, Transformer } from "react-konva";
 import type Konva from "konva";
-import { useDesign } from "./DesignProvider";
+import { useDesign } from "../../../providers/DesignProvider";
 import type { CanvasElement, IconElement, ImageElement, TextElement } from "./types";
 import DashboardCanvas from "../../DashboardPanel";
+import type{ Widget } from "../../../types/chat";
+import Draggable from "react-draggable";
+import { ResizableBox } from "react-resizable";
+import ChartDashboard from "../../dashboardComponents/ChartsDashboardHig";
+
 
 const PAGE_RATIO = 11 / 8.5; // Proporción similar a una hoja carta
 
@@ -175,6 +180,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
   const layerRef = useRef<Konva.Layer>(null);
   const editingSessionRef = useRef<string | null>(null);
   const [size, setSize] = useState({ width: 880, height: 880 * PAGE_RATIO });
+  const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [mode, setMode] = useState<"select" | "move">("select");
+  const [activeWidget, setActiveWidget] = useState(null);
+  const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
+const [editingWidgetId, setEditingWidgetId] = useState('');
   const [editingState, setEditingState] = useState<{
     id: string;
     value: string;
@@ -282,7 +292,28 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     if (!element || element.type !== "text") return null;
     return element as TextElement;
   }, [currentPage, editingState]);
-
+  useEffect(() => {
+      const handleAddFromEvent = (event: any) => {
+        const { id, type, label, diagramData } = event.detail;
+        setActiveWidget(null);
+        setWidgets((prev) => [
+          ...prev,
+          {
+            id: id || crypto.randomUUID(),
+            type: type || "diagram",
+            label: label || "Nuevo elemento",
+            diagramData: diagramData || {},
+            x: 50 + prev.length * 30,
+            y: 50 + prev.length * 30,
+            width: 450,
+            height: 450,
+            chartRef: React.createRef() // <-- asignamos ref
+          },
+        ]);
+      };
+      window.addEventListener("addDiagramToDashboard", handleAddFromEvent);
+      return () => window.removeEventListener("addDiagramToDashboard", handleAddFromEvent);
+    }, []);
   useEffect(() => {
     if (!editingState || !editingElement) {
       editingSessionRef.current = null;
@@ -347,6 +378,36 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
       </div>
     );
   }
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    try {
+      const data = e.dataTransfer.getData("application/json");
+      if (!data) return;
+
+      const parsed = JSON.parse(data);
+      const { id, type, label, diagramData } = parsed;
+
+      setWidgets((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: type || "diagram",
+          label: label || `Nuevo Diagrama`,
+          diagramData: diagramData || {},
+          x: 50 + prev.length * 30,
+          y: 50 + prev.length * 30,
+          width: 450,
+          height: 450,
+          chartRef: React.createRef() // <-- asignamos ref
+        },
+      ]);
+    } catch (error) {
+      console.error(" Error al procesar el drop:", error);
+    }
+  };
+    const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
+
 
   const scaledWidth = size.width * zoom;
   const scaledHeight = size.height * zoom;
@@ -356,6 +417,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
       className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
       ref={canvasWrapperRef}
       style={canvasWrapperStyle}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
     >
       <Stage
         width={scaledWidth}
@@ -363,6 +426,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
         ref={stageRef}
         scaleX={zoom}
         scaleY={zoom}
+        style={{ zIndex: 0, position: "absolute" }}
         className={editingState ? "cursor-text" : "cursor-crosshair"}
         onMouseDown={(e) => {
           const target = e.target;
@@ -418,8 +482,91 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
             anchorStroke="#0ea5e9"
             anchorFill="#0ea5e9"
           />
+       
         </Layer>
       </Stage>
+  {widgets.map(widget => {
+                    const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
+                    return (
+                      <Draggable
+                        key={widget.id}
+                        nodeRef={nodeRef}
+                        defaultPosition={{ x: widget.x, y: widget.y }}
+                        disabled={mode === "move"}
+                        cancel=".react-resizable-handle"
+                      >
+                        <div
+                          id={`widget-${widget.id}`}
+                          ref={nodeRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveWidget(widget.id)
+                          }}
+                         className={`absolute z-20 transition-all 
+        ${activeWidget === widget.id ? "outline outline-2 outline-blue-500" : "border-2"}
+
+  `}
+                        >
+                          {activeWidget === widget.id && (
+                            <div className="absolute -top-10 right-0 flex gap-2 
+                        bg-white dark:bg-zinc-800 
+                        px-3 py-2 rounded-xl border z-50
+                        shadow-[0_10px_12px_rgba(22,204,88,0.6)]">
+                              <button
+                                onClick={() => alert("Duplicar")}
+                                className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg"
+                              >
+                                <img src='/src/icons/icons8-duplicate-90.png' className="w-7 h-7"></img>
+                              </button>
+        
+                              <button
+                                onClick={() => handleRemoveWidget(widget.id)}
+                                className="p-1 hover:bg-green-100 dark:hover:bg-green-800 rounded-l"
+                              >
+                                <img src='/src/icons/icons8-trash-512.png' className="w-7 h-7"></img>
+                              </button>
+                            </div>
+                          )}
+                          <div className="flex justify-center mb-2">
+                            {/*  <button
+                              onClick={() => handleRemoveWidget(widget.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              ✖
+                            </button> */}
+                          </div>
+        
+                          <ResizableBox
+                            width={widget.width}
+                            height={widget.height}
+                            minConstraints={[200, 150]}
+                            resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
+                            className="relative border border-transparent hover:border-green-500 rounded-md"
+                            onResizeStop={(_, data) => {
+                              setWidgets(prev =>
+                                prev.map(w =>
+                                  w.id === widget.id
+                                    ? { ...w, width: data.size.width, height: data.size.height }
+                                    : w
+                                )
+                              );
+        
+                              if (widget.chartRef?.current?.chart) {
+                                widget.chartRef.current.chart.reflow();
+                              }
+        
+                            }}
+                          >
+                            {widget.diagramData ? (
+                              <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />
+                            ) : (
+                              <p className="text-gray-500 text-center py-10">Sin datos</p>
+                            )}
+                          </ResizableBox>
+                        </div>
+                      </Draggable>
+                    );
+                  })}
 
       {editingElement && editingBox && (
         <div
@@ -469,7 +616,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
 
   const dashboardCanvas = (
     <div
-      className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
+      className="relative overflow-hidden min-h-[640px] h-[500px] rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
 
     >
         <DashboardCanvas isActive onClose={closeDashboard} />
@@ -484,12 +631,16 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
   );
 
   return (
-    <div
+     <div
       ref={containerRef}
-      className="relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"
+      className=
+      
+       {showDashboard ? "relative h-full w-full overflow-hidden" : "relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"}
+      
     >
       {showDashboard ? dashboardCanvas : stageCanvas}
     </div>
+ 
   );
 };
 

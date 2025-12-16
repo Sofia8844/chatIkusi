@@ -36,19 +36,22 @@ const ChatMessage: FC<ChatMessageProps> = ({
         window.dispatchEvent(event);
       }
     };
-
+    const [hasImages, setHasImages] = useState(false); // controla el hover
+    const [preview, setPreview] = useState<string | null>(null);
     return (
       
       <div
-        className="flex items-start gap-3 transition-transform duration-200 hover:scale-[1.03]"
-        draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph"}
+ className={`flex items-start gap-3 transition-transform duration-200 ${
+    hasImages ? "" : "hover:scale-[1.03]"
+  }`}
+      draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph" }
         onDragStart={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
 
 
         <div className="w-12 h-12 rounded-full
-                flex items-center justify-center overflow-hidden 
+                flex items-center justify-center overflow-hidden flex-shrink-0
                 shadow-[0_0_0_4px_rgba(72,239,128,0.3)] hover:scale-105 transition-transform cursor-pointer">
           {avatarUrl ? (
             <img
@@ -113,7 +116,8 @@ const ChatMessage: FC<ChatMessageProps> = ({
               
 
             ) : responseData ? (
-              <MessageContent data={responseData} />
+              <MessageContent data={responseData} setHasImages={setHasImages}
+              preview={preview} setPreview={setPreview} />
             ) : (
               <p>{content}</p>
             )}
@@ -145,6 +149,7 @@ const ChatMessage: FC<ChatMessageProps> = ({
         {initial}
       </div>
     </div>
+    
   );
 };
 

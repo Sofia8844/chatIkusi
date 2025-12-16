@@ -10,7 +10,7 @@ interface DraggableChatProps {
   isActive: boolean;
   chatSections: ChatSection[];
   setChatSections: React.Dispatch<React.SetStateAction<ChatSection[]>>;
-  currentUser: UserProfile
+  currentUser: UserProfile;
 
 }
 
@@ -109,7 +109,7 @@ const DraggableChat: React.FC<DraggableChatProps> = ({
         <img
           src="/src/icons/icons8-chatbot-96.png" // ← tu imagen
           alt="Abrir Panel"
-          className="fixed z-10 w-20 h-20 rounded-full shadow-lg 
+          className="fixed z-30 w-20 h-20 rounded-full shadow-lg 
                      hover:scale-110 transition cursor-pointer"
           onClick={() => (isCollapsed ? handleExpand() : setIsCollapsed(true))}
 

@@ -1,5 +1,6 @@
 import React from "react";
-import { useDesign } from "./DesignProvider";
+import { useDesign } from "../../../providers/DesignProvider";
+import EditorExports from "./EditorExports";
 
 interface EditorToolbarProps {
   onDownload: (format: "png" | "jpg") => void;
@@ -7,22 +8,10 @@ interface EditorToolbarProps {
 
 const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
   const { addPage, undo, redo, canUndo, canRedo, zoom, setZoom, openDashboard } = useDesign();
-
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/30 px-4 py-3 shadow-lg backdrop-blur-xl">
-      <div className="flex gap-2">
-        <button
-          onClick={() => onDownload("png")}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow hover:scale-[1.01] transition"
-        >
-          Descargar PNG
-        </button>
-        <button
-          onClick={() => onDownload("jpg")}
-          className="px-4 py-2 rounded-xl bg-white text-emerald-700 border border-emerald-100 shadow-sm hover:border-emerald-300"
-        >
-          Descargar JPG
-        </button>
+
+  <div className="relative flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/30 px-4 py-3 shadow-lg backdrop-blur-xl">
+      <div className="flex gap-6 items-center flex-grow">
         <button
           onClick={addPage}
           className="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow hover:bg-emerald-700"
@@ -35,8 +24,11 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
         >
          Pizarra
         </button>
+        <div className="relative">
+       <EditorExports   onDownload={onDownload} previewImage="https://template.canva.com/EAF61wu7Pgk/2/0/600w-sOiE5b9j4f4.jpg"/>
+        </div>
       </div>
-
+      
       <div className="flex items-center gap-2">
         <button
           onClick={undo}
@@ -65,6 +57,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
           />
           <span className="text-sm text-emerald-700 font-semibold">{Math.round(zoom * 100)}%</span>
         </div>
+
       </div>
     </div>
   );

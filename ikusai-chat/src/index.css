@@ -49,3 +49,21 @@
     background: linear-gradient(135deg, #102a20 0%, #15392a 100%);
   }
 }
+@keyframes slideLeft {
+  from { transform: translateX(-100px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.animate-slideLeft {
+  animation: slideLeft 0.40s ease-out;
+}
+@keyframes rgbFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-rgbFlow {
+  background-size: 200% 200%;
+  animation: rgbFlow 8s ease infinite;
+}

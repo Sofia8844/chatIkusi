@@ -1,11 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type Konva from "konva";
 import DesignCanvas from "./DesignCanvas";
-import { DesignProvider, useDesign } from "./DesignProvider";
+import { DesignProvider, useDesign } from "../../../providers/DesignProvider";
 import EditorSidebar from "./EditorSidebar";
 import EditorToolbar from "./EditorToolbar";
 import PageNavigation from "./PageNavigation";
 import DraggableChat from '../../../components/DraggableChat'
+import { useChat, ChatProvider } from "../../../providers/ChatProvider";
+import { Context } from "konva/lib/Context";
 
 
 
@@ -13,22 +15,6 @@ const ExampleActions: React.FC = () => {
   const { addTextElement, addIconElement, addImageElement, changeBackground, applyTemplate,
   } =
     useDesign();
-  const getInitialDarkMode = (): boolean => {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    try {
-      const stored = window.localStorage.getItem(storageKey)
-      if (stored) {
-        return stored === 'dark'
-      }
-    } catch {
-      // ignore storage errors and fall back to media query
-    }
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  }
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
-
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/50 bg-white/60 px-4 py-3 shadow-sm backdrop-blur">
@@ -77,7 +63,8 @@ const EditorContent: React.FC = () => {
     useDesign();
 
   const stageRef = useRef<Konva.Stage>(null);
-
+  const { isDarkMode, toggleDarkMode, toggleDashboard,
+    chatSections, setChatSections, currentUser, setCurrentUser } = useChat();
   const handleDownload = (format: "png" | "jpg") => {
     const stage = stageRef.current;
     if (!stage) return;
@@ -91,7 +78,15 @@ const EditorContent: React.FC = () => {
     link.href = uri;
     link.click();
   };
-
+  useEffect(() => {
+    console.log("sss")
+    setCurrentUser({
+      id: 'cesar-villamil',
+      name: 'Cesar Villamil',
+      role: 'gerente_general',
+      title: 'Gerente General',
+    });
+  }, []);
   return (
     <div className="flex min-h-[calc(100vh-140px)] w-full max-w-[1440px] gap-4 overflow-y-auto p-5 pb-8 text-slate-800">
       <EditorSidebar />
@@ -102,15 +97,15 @@ const EditorContent: React.FC = () => {
           <DesignCanvas stageRef={stageRef} />
         </div>
         <PageNavigation />
-    {/*  <DraggableChat
+        <DraggableChat
           isDarkMode={isDarkMode}
-          onToggleTheme={handleToggleTheme}
-          onGenerateDashboard={handleToggleDashboard}
+          onToggleTheme={toggleDarkMode}
+          onGenerateDashboard={toggleDashboard}
           isActive={showDashboard}
           chatSections={chatSections}
           setChatSections={setChatSections}
           currentUser={currentUser}
-        /> */}
+        />
       </div>
     </div>
   );
@@ -119,21 +114,24 @@ const EditorContent: React.FC = () => {
 const EditPage: React.FC = () => {
   return (
     <DesignProvider>
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-sky-50 to-cyan-100 p-4">
-        <div className="flex items-center justify-between px-2 pb-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-500">Ikusito Diseño</p>
-            <h1 className="text-2xl font-bold text-emerald-900">Editor IKUSI</h1>
-            <p className="text-sm text-slate-600">
-              Múltiples páginas, capas, descargas PNG/JPG, plantillas y zoom.
-            </p>
+      <ChatProvider>
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-sky-50 to-cyan-100 p-4">
+          <div className="flex items-center justify-between px-2 pb-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-emerald-500">Ikusito Diseño</p>
+              <h1 className="text-2xl font-bold text-emerald-900">Editor IKUSI</h1>
+              <p className="text-sm text-slate-600">
+                Múltiples páginas, capas, descargas PNG/JPG, plantillas y zoom.
+              </p>
+            </div>
+            <div className="rounded-full bg-white/70 px-4 py-2 text-sm text-emerald-700 shadow">
+              Bienvenido Usuario, Sofia
+            </div>
+
           </div>
-          <div className="rounded-full bg-white/70 px-4 py-2 text-sm text-emerald-700 shadow">
-            Bienvenido Usuario, Sofia
-          </div>
+          <EditorContent />
         </div>
-        <EditorContent />
-      </div>
+      </ChatProvider>
     </DesignProvider>
   );
 };

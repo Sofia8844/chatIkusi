@@ -38,3 +38,15 @@ export interface QuickAction {
   label: string;
   message: string;
 }
+
+export interface Widget {
+  id: string;
+  type: string;
+  label: string;
+  diagramData: any;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  chartRef?: React.RefObject<any>;
+}

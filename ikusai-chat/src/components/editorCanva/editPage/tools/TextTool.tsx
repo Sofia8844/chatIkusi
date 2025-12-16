@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { quickTextBlocks } from "../constants";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 import type { TextElement } from "../types";
 
 const TextTool: React.FC = () => {

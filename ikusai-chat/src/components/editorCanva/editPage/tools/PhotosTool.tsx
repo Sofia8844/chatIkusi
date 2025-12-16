@@ -1,6 +1,6 @@
 import React from "react";
 import { samplePhotos } from "../constants";
-import { useDesign } from "../DesignProvider";
+import { useDesign } from "../../../../providers/DesignProvider";
 
 const PhotosTool: React.FC = () => {
   const { addImageElement } = useDesign();
