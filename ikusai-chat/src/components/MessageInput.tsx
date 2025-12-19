@@ -5,19 +5,24 @@ import { useNavigate } from "react-router-dom";
 interface MessageInputProps {
   onSend(message: string): void
   quickActions?: QuickAction[],// nuevo prop
-  isActive: Boolean
+  isActive: Boolean,
+  isDisabled: boolean
 }
 
-const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGenerateDashboard,isActive}) => {
+const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGenerateDashboard, isActive,
+  isDisabled
+}) => {
   const [message, setMessage] = useState('')
   const navigate = useNavigate();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (isDisabled) return;
     sendMessage(message)
   }
 
   const sendMessage = (value: string) => {
+    if (isDisabled) return;
     const trimmed = value.trim()
     if (!trimmed) {
       return
@@ -29,17 +34,18 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGene
   const handleQuickAction = (action: QuickAction) => {
     // Si el botón es "Generar Dashboard", llama la función especial
     if (action.id === 'generate-dashboard' && !isActive) {
-     // onGenerateDashboard()
-     navigate("/editMenu"); // ← aquí navega
+      // onGenerateDashboard()
+      navigate("/editMenu"); // ← aquí navega
       return
     }
     // Si no, envía el mensaje normal
-    if(action.id === 'chat'){
-      if(isActive){
+    if (action.id === 'chat') {
+      if (isActive) {
         navigate("/editMenu"); // ← aquí navega
         //onGenerateDashboard();
-      } 
-       sendMessage(action.message)
+      }
+      navigate("/"); // ← aquí navega
+      sendMessage(action.message)
     }
     console.log(isActive)
   }
@@ -67,9 +73,16 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, quickActions = [], onGene
         <input
           type="text"
           value={message}
+          disabled={isDisabled}
           onChange={(event) => setMessage(event.target.value)}
-          placeholder="Type your message here..."
-        className="w-full py-3 pl-4 pr-12 rounded-xl bg-white border border-gray-200  shadow-[0_8px_24px_rgba(15,15,15,0.35)] hover:shadow-[0_8px_24px_rgba(72,239,128,0.35)] focus:shadow-[0_10px_28px_rgba(72,239,128,0.45)] focus:ring-2 focus:ring-green-200    focus:outline-none transition-all duration-300"
+          placeholder={
+            isDisabled
+              ? "🤖 Ikusito está pensando..."
+              : "Type your message here..."
+          }
+          className={`w-full py-3 pl-4 pr-12 rounded-xl bg-white border border-gray-200  shadow-[0_8px_24px_rgba(15,15,15,0.35)] hover:shadow-[0_8px_24px_rgba(72,239,128,0.35)] focus:shadow-[0_10px_28px_rgba(72,239,128,0.45)] focus:ring-2 focus:ring-green-200    focus:outline-none transition-all duration-300
+              ${isDisabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-500" : ""}
+          `}
         />
         <button
           type="submit"

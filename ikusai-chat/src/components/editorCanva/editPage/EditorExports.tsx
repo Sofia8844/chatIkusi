@@ -13,7 +13,7 @@ const EditorExports: React.FC<EditorExportsProps> = ({ onDownload,  previewImage
     return (
         <>
             {/* TOOLBAR PRINCIPAL */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/30 px-4 py-3 shadow-lg backdrop-blur-xl">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-2">
                     {/* Botón que abre el panel */}
                     <button

@@ -20,7 +20,7 @@ export function adaptMessagesToSections(
     const section = sectionMap.get(dateKey)!;
 
     const uiMessage: ChatMessageProps = {
-      id: msg.id,
+      id: msg.conversacion_id,
       author: msg.sender === 'ai' ? 'Ikusito' : 'You',
       content: msg.content,
       timestamp: formatTime(msg.timestamp),

@@ -6,9 +6,13 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onNewConversation:() => void;
+  onSelectConversation: (conversationId: string) => void; // ✅ nueva prop
+  currentConversationId: string | null;
 }
 
-const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse, onNewConversation }) => {
+const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse, onNewConversation,
+    onSelectConversation,currentConversationId
+ }) => {
   return (
     <aside
       className={`transition-all duration-700 ease-in-out border-r border-light-border dark:border-dark-border bg-white dark:bg-zinc-900 flex flex-col p-4 ${
@@ -41,6 +45,7 @@ const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse, onN
               {section.title}
             </h2>
             {section.items.map((item) => {
+               const isActive = item.conversation_id === currentConversationId;
               const baseClasses = 'flex items-center p-2 rounded-lg transition-colors';
               const activeClasses = 'bg-light-accent dark:bg-dark-accent text-primary font-semibold';
               const inactiveClasses =
@@ -48,22 +53,27 @@ const Sidebar: FC<SidebarProps> = ({ sections,isCollapsed, onToggleCollapse, onN
 
               return (
                 <a
-                  key={item.id}
+                  key={item.conversation_id}
                   href="#"
                   className={`${baseClasses} ${
-                    item.isActive ? activeClasses : inactiveClasses
+                    isActive ? activeClasses : inactiveClasses
                   }`}
+                   onClick={(e) => {
+                    e.preventDefault();
+                    onSelectConversation(item.conversation_id); // ✅ llama al padre
+                  }}
                 >
                   <span
                     className={`material-icons mr-3 text-xl ${
-                      item.isActive
+                      isActive
                         ? 'text-primary'
                         : 'text-light-text-secondary dark:text-dark-text-secondary'
                     }`}
                   >
                     {item.icon}
+                    chat_bubble_outline
                   </span>
-                  {!isCollapsed && item.preview}
+                  {!isCollapsed && item.last_message}
                 </a>
               );
             })}

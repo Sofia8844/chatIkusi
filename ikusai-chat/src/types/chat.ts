@@ -13,18 +13,19 @@ export interface ChatMessageProps {
 }
 
 export interface ChatHistoryItem {
-  id: string;
+  conversation_id: string; // antes: id
   title: string;
-  icon: string;
-  preview: string;
-  isActive?: boolean;
+  last_message: string;    // antes: preview
+  updated_at: string;
+  isActive?: boolean;      // opcional, para UI
+  icon?: string           //
 }
 
 export interface ChatHistorySection {
   id: string;
   title: string;
   items: ChatHistoryItem[];
-}
+} 
 
 export interface ChatSection {
   id: string;

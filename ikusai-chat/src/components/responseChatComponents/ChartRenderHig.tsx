@@ -81,12 +81,12 @@ export default function ChartRenderer({ data }: Props) {
           const num = parseFloat(r[yIndex]);
           return isNaN(num) ? 0 : num;
       }); */
-    const values = data.rows.map((r) => {
-        return yIndex.map((i) => {
+    const values = yIndex.map((i) =>
+        data.rows.map((r) => {
             const num = parseFloat(r[i]);
             return isNaN(num) ? 0 : num;
         })
-    })
+    );
 
     //Valores para diagramas circulares
     const seriesDataDoungh = data.rows.map((r) => ({
@@ -104,19 +104,19 @@ export default function ChartRenderer({ data }: Props) {
         bubble: "bubble",
     };
     const hcType = typeMap[data.type.toLowerCase()] || "column";
-        //Series
+    //Series
     const series = hcType === "pie" || hcType === "doughnut"
-  ? [{
-      type: hcType as any,
-      name: data.details || "Datos",
-      data: seriesDataDoungh,
-      colorByPoint: true,
-    }]
-  : yIndex.map((i, idx) => ({
-      type: hcType as any,
-      name: data.mapping.y_key[idx],
-      data: values[idx],
-    }));
+        ? [{
+            type: hcType as any,
+            name: data.details || "Datos",
+            data: seriesDataDoungh,
+            colorByPoint: true,
+        }]
+        : yIndex.map((i, idx) => ({
+            type: hcType as any,
+            name: data.mapping.y_key[idx],
+            data: values[idx],
+        }));
 
     // Activar 3D para todos los gráficos
     const options: Highcharts.Options = {
@@ -189,26 +189,26 @@ export default function ChartRenderer({ data }: Props) {
         },
         series: series,
 
-                //colorByPoint: hcType === "pie",
-                /*colors:[ "#00936B", // verde profundo
-    "#36A2EB", // azul claro
-    "#FFA643", // naranja suave
-    
-    "#00AC78", // verde medio
-    "#5BB1E6", // azul intermedio
-    "#FFCD57", // amarillo cálido
-    
-    "#00C588", // verde vibrante
-    "#8FC6F0", // azul pastel
-    "#FF8A5C", // coral suave
-    
-    "#33D19B", // verde menta
-    "#B7DFF6", // azul muy suave
-    "#7A5AF5", // violeta moderno
-    
-    "#66DCAE", // verde claro
-    "#036F8A", // azul petróleo
-    "#B083FF"  // lavanda pastel]*/
+        //colorByPoint: hcType === "pie",
+        /*colors:[ "#00936B", // verde profundo
+"#36A2EB", // azul claro
+"#FFA643", // naranja suave
+ 
+"#00AC78", // verde medio
+"#5BB1E6", // azul intermedio
+"#FFCD57", // amarillo cálido
+ 
+"#00C588", // verde vibrante
+"#8FC6F0", // azul pastel
+"#FF8A5C", // coral suave
+ 
+"#33D19B", // verde menta
+"#B7DFF6", // azul muy suave
+"#7A5AF5", // violeta moderno
+ 
+"#66DCAE", // verde claro
+"#036F8A", // azul petróleo
+"#B083FF"  // lavanda pastel]*/
         exporting: {
             buttons: {
                 contextButton: {

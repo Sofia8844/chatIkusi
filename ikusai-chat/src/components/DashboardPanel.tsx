@@ -9,6 +9,8 @@ import "../css/DashboardCanva.css";
 import ChartDashboard from "./dashboardComponents/ChartsDashboardHig";
 import EditableTitle from "./dashboardComponents/EditableLabels";
 import HeaderDashboard from "./dashboardComponents/Headers";
+import { useDesign } from "../providers/DesignProvider";
+
 import type {
   CanvasElement,
   IconElement,
@@ -68,7 +70,7 @@ const ElementNode: React.FC<ElementNodeProps> = ({
   canDrag,
   onSelect,
   onChange,
-  onEditRequest,
+  onEditRequest
 }) => {
   const shapeRef = useRef<Konva.Text | Konva.Image>(null);
   const icon = element as IconElement;
@@ -192,6 +194,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+    const {
+      addImageElement,
+    } = useDesign();
   const [editingState, setEditingState] = useState<{
     id: string;
     value: string;
@@ -448,30 +453,39 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    try {
-      const data = e.dataTransfer.getData("application/json");
-      if (!data) return;
-
-      const parsed = JSON.parse(data);
-      const { id, type, label, diagramData } = parsed;
-
-      setWidgets((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          type: type || "diagram",
-          label: label || `Nuevo Diagrama`,
-          diagramData: diagramData || {},
-          x: 50 + prev.length * 30,
-          y: 50 + prev.length * 30,
-          width: 450,
-          height: 450,
-          chartRef: React.createRef() // <-- asignamos ref
-        },
-      ]);
-    } catch (error) {
-      console.error(" Error al procesar el drop:", error);
-    }
+       try {
+         const data = e.dataTransfer.getData("application/json");
+         if (!data) return;
+   
+         const parsed = JSON.parse(data);
+         const { id, type, label, diagramData } = parsed;
+         
+       if (parsed.type === "image" && parsed.src) {
+         if (!stageRef.current) return;
+         const stage = stageRef.current;
+         const pointer = stage.getPointerPosition() || { x: 50, y: 50 };
+         addImageElement(parsed.src, "Imagen arrastrada", 310, 200);
+       }
+         if( parsed.type !== "image"){
+              setWidgets((prev) => [
+           ...prev,
+           {
+             id: crypto.randomUUID(),
+             type: type || "diagram",
+             label: label || `Nuevo Diagrama`,
+             diagramData: diagramData || {},
+             x: 50 + prev.length * 30,
+             y: 50 + prev.length * 30,
+             width: 450,
+             height: 450,
+             chartRef: React.createRef() // <-- asignamos ref
+           },
+         ]);
+         }
+         
+       } catch (error) {
+         console.error(" Error al procesar el drop:", error);
+       }
   };
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
@@ -669,13 +683,14 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                         )
                       );
 
-                      if (widget.chartRef?.current?.chart) {
+                      if (widget.chartRef?.current && widget.chartRef.current.chart) 
+                        { 
                         widget.chartRef.current.chart.reflow();
                       }
 
                     }}
                   >
-                    {widget.diagramData ? (
+                            {widget.diagramData && widget.diagramData.type !== "text_with_image" ? (
                       <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />
                     ) : (
                       <p className="text-gray-500 text-center py-10">Sin datos</p>

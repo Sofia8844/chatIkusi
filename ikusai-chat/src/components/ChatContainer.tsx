@@ -28,6 +28,7 @@ const ChatContainer: FC<ChatContainerProps> = ({
   currentUser
 }) => {
   const chatBodyRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
   const getDataChat = async (content: string) => {
     try {
       const user_id = "1";
@@ -47,6 +48,9 @@ const ChatContainer: FC<ChatContainerProps> = ({
   });
 
   const handleSendMessage = async (content: string) => {
+    if(isSending) return;
+
+    setIsSending(true);
     // 1️⃣ Mensaje del usuario
     const userMessage: ChatMessageProps = {
       id: `user-${Date.now()}`,
@@ -104,6 +108,8 @@ const ChatContainer: FC<ChatContainerProps> = ({
         );
         return [{ ...first, messages: updatedMessages }, ...rest];
       })
+    } finally{
+      setIsSending(false);
     }
   }
   useEffect(() => {
@@ -162,7 +168,8 @@ const showWelcome = totalMessages < 2;
       <div className="sticky bottom-0 p-6 border-t border-light-border dark:border-dark-border 
                bg-background-light/70
                backdrop-blur-md shadow-md">
-        <MessageInput isActive={isActive} quickActions={quickActions} onSend={handleSendMessage} onGenerateDashboard={onGenerateDashboard} />
+        <MessageInput isActive={isActive}
+        isDisabled={isSending} quickActions={quickActions} onSend={handleSendMessage} onGenerateDashboard={onGenerateDashboard} />
       </div>)}
     </main>
   )

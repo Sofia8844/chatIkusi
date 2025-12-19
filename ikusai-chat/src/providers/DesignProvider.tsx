@@ -17,7 +17,7 @@ interface DesignContextValue {
   deletePage: (pageId: string) => void;
   setCurrentPage: (pageId: string) => void;
   addTextElement: (value: string, fontSize?: number) => void;
-  addImageElement: (src: string, name?: string) => void;
+  addImageElement: (src: string, name?: string, widget?:number, height?:number) => void;
   addIconElement: (text: string) => void;
   applyTemplate: (templateId: string) => void;
   changeBackground: (value: string) => void;
@@ -107,7 +107,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
     savedDesigns: [],
   });
   //Pizarra
-  
+
   // nuevo estado para mostrar dashboard
   const [showDashboard, setShowDashboard] = useState(false);
 
@@ -245,7 +245,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
     });
   };
 
-  const addImageElement = (src: string, name = "Imagen") => {
+  const addImageElement = (src: string, name = "Imagen", width?: number, height?: number) => {
     if (
       dispatchDashboardElement({
         type: "image",
@@ -266,8 +266,8 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         src,
         x: 160,
         y: 180,
-        width: 280,
-        height: 180,
+        width: width ?? 280,   
+        height: height ?? 180,
         opacity: 0.96,
       });
       draft.selectedElementId = id;
@@ -459,7 +459,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       canRedo: future.length > 0,
       zoom: state.zoom,
       setZoom,
-        // nuevos
+      // nuevos
       showDashboard,
       openDashboard,
       closeDashboard,

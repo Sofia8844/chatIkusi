@@ -1,3 +1,4 @@
+import type {ChatHistoryItem } from '../types/chat';
 export interface ChatResponse {
     data: {
         user_query: string;
@@ -15,18 +16,11 @@ export interface NewConversationResponse{
     conversation_id: string;
     created_at: string;
 }
-//Interface Chat History Conversation
-export interface ChatHistoryItem {
-  conversation_id: string;
-  title: string;
-  last_message: string;
-  updated_at: string;
-}
 //Interface ChatMessage
  export interface ChatMessage {
-  id: string;
+  conversacion_id: string;
   sender: "user" | "ai";
-  content: string;
+  content?: string;
   timestamp: string;
   data?: {
     type: string;

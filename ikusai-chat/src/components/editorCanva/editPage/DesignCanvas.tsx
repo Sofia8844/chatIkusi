@@ -170,6 +170,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     selectElement,
     updateElement,
     deleteSelected,
+    addImageElement,
     zoom,
     showDashboard,       // <- nuevo
     closeDashboard,      // <- nuevo
@@ -387,8 +388,15 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
 
       const parsed = JSON.parse(data);
       const { id, type, label, diagramData } = parsed;
-
-      setWidgets((prev) => [
+      
+    if (parsed.type === "image" && parsed.src) {
+      if (!stageRef.current) return;
+      const stage = stageRef.current;
+      const pointer = stage.getPointerPosition() || { x: 50, y: 50 };
+      addImageElement(parsed.src, "Imagen arrastrada", 310, 200);
+    }
+      if( parsed.type !== "image"){
+           setWidgets((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
@@ -402,6 +410,10 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
           chartRef: React.createRef() // <-- asignamos ref
         },
       ]);
+      }
+      
+   
+      
     } catch (error) {
       console.error(" Error al procesar el drop:", error);
     }
@@ -503,7 +515,7 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
                             setActiveWidget(widget.id)
                           }}
                          className={`absolute z-20 transition-all 
-        ${activeWidget === widget.id ? "outline outline-2 outline-blue-500" : "border-2"}
+        ${activeWidget === widget.id ? "border-blue-500" : "border-2"}
 
   `}
                         >
@@ -551,13 +563,13 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
                                 )
                               );
         
-                              if (widget.chartRef?.current?.chart) {
+                              if (widget.chartRef?.current &&  widget.chartRef.current.chart) {
                                 widget.chartRef.current.chart.reflow();
                               }
         
                             }}
                           >
-                            {widget.diagramData ? (
+                            {widget.diagramData && widget.diagramData.type !== "text_with_image" ? (
                               <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />
                             ) : (
                               <p className="text-gray-500 text-center py-10">Sin datos</p>

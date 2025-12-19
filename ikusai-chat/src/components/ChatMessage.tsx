@@ -18,13 +18,36 @@ const ChatMessage: FC<ChatMessageProps> = ({
   if (isAI) {
     const handleDragStart = (e: React.DragEvent) => {
       if (responseData) {
-        e.dataTransfer.setData(
+        const target = e.target as HTMLElement;
+        // 👉 IMAGEN
+        if (target.src && responseData.type === "text_with_image") {
+          e.dataTransfer.setData(
+            "application/json",
+            JSON.stringify({
+              type: "image",
+              src: target.src
+            })
+          );
+          return;
+        }
+
+        // 👉 CHART
+        if (responseData.type !== "text_with_image") {
+          e.dataTransfer.setData(
+            "application/json",
+            JSON.stringify({
+              type: "chart",
+              diagramData: responseData
+            })
+          );
+        }
+       /*  e.dataTransfer.setData(
           "application/json",
           JSON.stringify({
             id,
             diagramData: responseData
           })
-        );
+        ); */
       }
     };
 
@@ -39,12 +62,13 @@ const ChatMessage: FC<ChatMessageProps> = ({
     const [hasImages, setHasImages] = useState(false); // controla el hover
     const [preview, setPreview] = useState<string | null>(null);
     return (
-      
+
       <div
- className={`flex items-start gap-3 transition-transform duration-200 ${
-    hasImages ? "" : "hover:scale-[1.03]"
-  }`}
-      draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph" }
+        className={`flex items-start gap-3 transition-transform duration-200 ${hasImages ? "" : "hover:scale-[1.03]"
+          }`}
+        draggable={!!responseData && responseData.type?.toLowerCase() !== "paragraph"
+          &&     responseData.type?.toLowerCase() !== "text_with_image"
+        }
         onDragStart={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
@@ -63,7 +87,7 @@ const ChatMessage: FC<ChatMessageProps> = ({
             <span className="text-white font-bold text-lg select-none">AI</span>
           )}
         </div>
-   
+
         <div>
           {/* Cabecera del mensaje */}
           <div className="flex items-baseline gap-2">
@@ -79,45 +103,45 @@ const ChatMessage: FC<ChatMessageProps> = ({
           <div
             className="mt-1 p-4 rounded-lg rounded-tl-none ai-chat-bubble-gradient-light dark:ai-chat-bubble-gradient-dark text-light-text-primary dark:text-dark-text-primary w-full max-w-4xl shadow-sm overflow-hidden">
             {isLoading ? (
-              
-  <div className="relative  w-64 h-20 rounded-xl bg-white border border-transparent flex items-center justify-center overflow-visible">
 
-  {/* Borde animado  */}
-  <svg
-    className="absolute inset-0 w-full h-full overflow-visible"
-    width="100%"
-    height="100%"
-  >
-    <rect
-      x="2"
-      y="2"
-      width="100%"
-      height="100%"
-      rx="12"
-      ry="12"
-      fill="none"
-      stroke="rgb(64, 163, 184)"
-      strokeWidth="2"
-      strokeDasharray="200"
-      className="animate-perimeter"
-      style={{ filter: "drop-shadow(0 0 6px rgba(99,102,241,0.8))" }}
-    />
-  </svg>
+              <div className="relative  w-64 h-20 rounded-xl bg-white border border-transparent flex items-center justify-center overflow-visible">
 
-  {/* Texto */}
-  <p className="relative text-gray-700 font-bold text-sm">
-       🤖 Generando respuesta...
-    <span
-      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shimmer"
-      style={{ backgroundSize: "200% 100%" }}
-    ></span>
-  </p>
-</div>
-              
+                {/* Borde animado  */}
+                <svg
+                  className="absolute inset-0 w-full h-full overflow-visible"
+                  width="100%"
+                  height="100%"
+                >
+                  <rect
+                    x="2"
+                    y="2"
+                    width="100%"
+                    height="100%"
+                    rx="12"
+                    ry="12"
+                    fill="none"
+                    stroke="rgb(64, 163, 184)"
+                    strokeWidth="2"
+                    strokeDasharray="200"
+                    className="animate-perimeter"
+                    style={{ filter: "drop-shadow(0 0 6px rgba(99,102,241,0.8))" }}
+                  />
+                </svg>
+
+                {/* Texto */}
+                <p className="relative text-gray-700 font-bold text-sm">
+                  🤖 Generando respuesta...
+                  <span
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shimmer"
+                    style={{ backgroundSize: "200% 100%" }}
+                  ></span>
+                </p>
+              </div>
+
 
             ) : responseData ? (
               <MessageContent data={responseData} setHasImages={setHasImages}
-              preview={preview} setPreview={setPreview} />
+                preview={preview} setPreview={setPreview} />
             ) : (
               <p>{content}</p>
             )}
@@ -149,7 +173,7 @@ const ChatMessage: FC<ChatMessageProps> = ({
         {initial}
       </div>
     </div>
-    
+
   );
 };
 
