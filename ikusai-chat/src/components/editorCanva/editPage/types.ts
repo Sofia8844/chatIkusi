@@ -65,3 +65,10 @@ export interface EditorState {
   zoom: number;
   savedDesigns: SavedDesign[];
 }
+// TemplatePreview.ts
+export interface TemplatePreview {
+  id: string;
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+}

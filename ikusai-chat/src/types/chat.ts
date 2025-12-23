@@ -1,3 +1,4 @@
+import type { CanvasElement } from "../components/editorCanva/editPage/types";
 export interface ChatMessageProps {
   id: string;
   author: string;

@@ -4,10 +4,12 @@ import type Konva from "konva";
 import { useDesign } from "../../../providers/DesignProvider";
 import type { CanvasElement, IconElement, ImageElement, TextElement } from "./types";
 import DashboardCanvas from "../../DashboardPanel";
-import type{ Widget } from "../../../types/chat";
+import type { Widget } from "../../../types/chat";
 import Draggable from "react-draggable";
 import { ResizableBox } from "react-resizable";
 import ChartDashboard from "../../dashboardComponents/ChartsDashboardHig";
+import MessageInput from "../../MessageInput";
+import MessageContent from "../../responseChatComponents/ComponentRender";
 
 
 const PAGE_RATIO = 11 / 8.5; // Proporción similar a una hoja carta
@@ -174,6 +176,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
     zoom,
     showDashboard,       // <- nuevo
     closeDashboard,      // <- nuevo
+    widgets,
+    addWidget
   } = useDesign();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -181,11 +185,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ stageRef }) => {
   const layerRef = useRef<Konva.Layer>(null);
   const editingSessionRef = useRef<string | null>(null);
   const [size, setSize] = useState({ width: 880, height: 880 * PAGE_RATIO });
-  const [widgets, setWidgets] = useState<Widget[]>([]);
-  const [mode, setMode] = useState<"select" | "move">("select");
+  /*   const [widgets, setWidgets] = useState<Widget[]>([]);
+ */  const [mode, setMode] = useState<"select" | "move">("select");
   const [activeWidget, setActiveWidget] = useState(null);
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
-const [editingWidgetId, setEditingWidgetId] = useState('');
+  const [editingWidgetId, setEditingWidgetId] = useState('');
   const [editingState, setEditingState] = useState<{
     id: string;
     value: string;
@@ -294,27 +298,27 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
     return element as TextElement;
   }, [currentPage, editingState]);
   useEffect(() => {
-      const handleAddFromEvent = (event: any) => {
-        const { id, type, label, diagramData } = event.detail;
-        setActiveWidget(null);
-        setWidgets((prev) => [
-          ...prev,
-          {
-            id: id || crypto.randomUUID(),
-            type: type || "diagram",
-            label: label || "Nuevo elemento",
-            diagramData: diagramData || {},
-            x: 50 + prev.length * 30,
-            y: 50 + prev.length * 30,
-            width: 450,
-            height: 450,
-            chartRef: React.createRef() // <-- asignamos ref
-          },
-        ]);
-      };
-      window.addEventListener("addDiagramToDashboard", handleAddFromEvent);
-      return () => window.removeEventListener("addDiagramToDashboard", handleAddFromEvent);
-    }, []);
+    const handleAddFromEvent = (event: any) => {
+      const { id, type, label, diagramData } = event.detail;
+      setActiveWidget(null);
+      addWidget((prev) => [
+        ...prev,
+        {
+          id: id || crypto.randomUUID(),
+          type: type || "diagram",
+          label: label || "Nuevo elemento",
+          diagramData: diagramData || {},
+          x: 50 + prev.length * 30,
+          y: 50 + prev.length * 30,
+          width: 450,
+          height: 450,
+          chartRef: React.createRef() // <-- asignamos ref
+        },
+      ]);
+    };
+    window.addEventListener("addDiagramToDashboard", handleAddFromEvent);
+    return () => window.removeEventListener("addDiagramToDashboard", handleAddFromEvent);
+  }, []);
   useEffect(() => {
     if (!editingState || !editingElement) {
       editingSessionRef.current = null;
@@ -379,6 +383,7 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
       </div>
     );
   }
+  const ALLOWED_CHART_TYPES = ["line", "bar", "pie", "doughnut", "radar", "bubble"];
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -388,37 +393,37 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
 
       const parsed = JSON.parse(data);
       const { id, type, label, diagramData } = parsed;
-      
-    if (parsed.type === "image" && parsed.src) {
-      if (!stageRef.current) return;
-      const stage = stageRef.current;
-      const pointer = stage.getPointerPosition() || { x: 50, y: 50 };
-      addImageElement(parsed.src, "Imagen arrastrada", 310, 200);
-    }
-      if( parsed.type !== "image"){
-           setWidgets((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          type: type || "diagram",
-          label: label || `Nuevo Diagrama`,
-          diagramData: diagramData || {},
-          x: 50 + prev.length * 30,
-          y: 50 + prev.length * 30,
-          width: 450,
-          height: 450,
-          chartRef: React.createRef() // <-- asignamos ref
-        },
-      ]);
+
+      if (parsed.type === "image" && parsed.src) {
+        if (!stageRef.current) return;
+        const stage = stageRef.current;
+        const pointer = stage.getPointerPosition() || { x: 50, y: 50 };
+        addImageElement(parsed.src, "Imagen arrastrada", 310, 200);
       }
-      
-   
-      
+      if (parsed.type !== "image") {
+        addWidget((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            type: type || "diagram",
+            label: label || `Nuevo Diagrama`,
+            diagramData: diagramData || {},
+            x: 50 + prev.length * 30,
+            y: 50 + prev.length * 30,
+            width: 450,
+            height: 450,
+            chartRef: React.createRef() // <-- asignamos ref
+          },
+        ]);
+      }
+
+
+
     } catch (error) {
       console.error(" Error al procesar el drop:", error);
     }
   };
-    const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
+  const handleRemoveWidget = (id: string) => addWidget(prev => prev.filter(w => w.id !== id));
 
 
   const scaledWidth = size.width * zoom;
@@ -494,91 +499,94 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
             anchorStroke="#0ea5e9"
             anchorFill="#0ea5e9"
           />
-       
+
         </Layer>
       </Stage>
-  {widgets.map(widget => {
-                    const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
-                    return (
-                      <Draggable
-                        key={widget.id}
-                        nodeRef={nodeRef}
-                        defaultPosition={{ x: widget.x, y: widget.y }}
-                        disabled={mode === "move"}
-                        cancel=".react-resizable-handle"
-                      >
-                        <div
-                          id={`widget-${widget.id}`}
-                          ref={nodeRef}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveWidget(widget.id)
-                          }}
-                         className={`absolute z-20 transition-all 
+      {widgets.map(widget => {
+        const nodeRef = (nodeRefs.current[widget.id] ??= React.createRef<HTMLDivElement>());
+        return (
+          <Draggable
+            key={widget.id}
+            nodeRef={nodeRef}
+            defaultPosition={{ x: widget.x, y: widget.y }}
+            disabled={mode === "move"}
+            cancel=".react-resizable-handle"
+          >
+            <div
+              id={`widget-${widget.id}`}
+              ref={nodeRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveWidget(widget.id)
+              }}
+              className={`absolute z-20 transition-all 
         ${activeWidget === widget.id ? "border-blue-500" : "border-2"}
 
   `}
-                        >
-                          {activeWidget === widget.id && (
-                            <div className="absolute -top-10 right-0 flex gap-2 
+            >
+              {activeWidget === widget.id && (
+                <div className="absolute -top-10 right-0 flex gap-2 
                         bg-white dark:bg-zinc-800 
                         px-3 py-2 rounded-xl border z-50
                         shadow-[0_10px_12px_rgba(22,204,88,0.6)]">
-                              <button
-                                onClick={() => alert("Duplicar")}
-                                className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg"
-                              >
-                                <img src='/src/icons/icons8-duplicate-90.png' className="w-7 h-7"></img>
-                              </button>
-        
-                              <button
-                                onClick={() => handleRemoveWidget(widget.id)}
-                                className="p-1 hover:bg-green-100 dark:hover:bg-green-800 rounded-l"
-                              >
-                                <img src='/src/icons/icons8-trash-512.png' className="w-7 h-7"></img>
-                              </button>
-                            </div>
-                          )}
-                          <div className="flex justify-center mb-2">
-                            {/*  <button
+                  <button
+                    onClick={() => alert("Duplicar")}
+                    className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg"
+                  >
+                    <img src='/src/icons/icons8-duplicate-90.png' className="w-7 h-7"></img>
+                  </button>
+
+                  <button
+                    onClick={() => handleRemoveWidget(widget.id)}
+                    className="p-1 hover:bg-green-100 dark:hover:bg-green-800 rounded-l"
+                  >
+                    <img src='/src/icons/icons8-trash-512.png' className="w-7 h-7"></img>
+                  </button>
+                </div>
+              )}
+              <div className="flex justify-center mb-2">
+                {/*  <button
                               onClick={() => handleRemoveWidget(widget.id)}
                               className="text-red-500 hover:text-red-700"
                             >
                               ✖
                             </button> */}
-                          </div>
-        
-                          <ResizableBox
-                            width={widget.width}
-                            height={widget.height}
-                            minConstraints={[200, 150]}
-                            resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
-                            className="relative border border-transparent hover:border-green-500 rounded-md"
-                            onResizeStop={(_, data) => {
-                              setWidgets(prev =>
-                                prev.map(w =>
-                                  w.id === widget.id
-                                    ? { ...w, width: data.size.width, height: data.size.height }
-                                    : w
-                                )
-                              );
-        
-                              if (widget.chartRef?.current &&  widget.chartRef.current.chart) {
-                                widget.chartRef.current.chart.reflow();
-                              }
-        
-                            }}
-                          >
-                            {widget.diagramData && widget.diagramData.type !== "text_with_image" ? (
-                              <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />
-                            ) : (
-                              <p className="text-gray-500 text-center py-10">Sin datos</p>
-                            )}
-                          </ResizableBox>
-                        </div>
-                      </Draggable>
-                    );
-                  })}
+              </div>
+
+              <ResizableBox
+                width={widget.width}
+                height={widget.height}
+                minConstraints={[200, 150]}
+                resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
+                className="relative border border-transparent hover:border-green-500 rounded-md"
+                onResizeStop={(_, data) => {
+                  addWidget(prev =>
+                    prev.map(w =>
+                      w.id === widget.id
+                        ? { ...w, width: data.size.width, height: data.size.height }
+                        : w
+                    )
+                  );
+
+                  if (widget.chartRef?.current && widget.chartRef.current.chart) {
+                    widget.chartRef.current.chart.reflow();
+                  }
+
+                }}
+              >
+                {widget.diagramData && ALLOWED_CHART_TYPES.includes(widget.diagramData.type)
+                  ? (
+                    <ChartDashboard data={widget.diagramData} ref={widget.chartRef} />) :
+                  (
+                    <MessageContent data={widget.diagramData}/>
+                    //<p className="text-gray-500 text-center py-10">Sin datos</p>
+
+                  )}
+              </ResizableBox>
+            </div>
+          </Draggable>
+        );
+      })}
 
       {editingElement && editingBox && (
         <div
@@ -631,7 +639,7 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
       className="relative overflow-hidden min-h-[640px] h-[500px] rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]"
 
     >
-        <DashboardCanvas isActive onClose={closeDashboard} />
+      <DashboardCanvas isActive onClose={closeDashboard} />
       <button
         type="button"
         onClick={closeDashboard}
@@ -643,16 +651,16 @@ const [editingWidgetId, setEditingWidgetId] = useState('');
   );
 
   return (
-     <div
+    <div
       ref={containerRef}
       className=
-      
-       {showDashboard ? "relative h-full w-full overflow-hidden" : "relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"}
-      
+
+      {showDashboard ? "relative h-full w-full overflow-hidden" : "relative flex h-full w-full items-center justify-center overflow-auto rounded-[32px] border border-white/50 bg-gradient-to-br from-white/75 via-white to-emerald-50/70 p-8 shadow-2xl backdrop-blur-xl"}
+
     >
       {showDashboard ? dashboardCanvas : stageCanvas}
     </div>
- 
+
   );
 };
 

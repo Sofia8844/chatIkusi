@@ -15,13 +15,13 @@ interface Props {
     mapping?: { x_key: string | string[]; y_key: string | string[] };
   };
  setHasImages?: (flag: boolean) => void;
-    preview: string | null;
-  setPreview: (src: string | null) => void;
+    preview?: string | null;
+  setPreview?: (src: string | null) => void;
 
 }
 
 
-export default function MessageContent({ data,setHasImages,setPreview,preview}: Props) {
+export default function MessageContent({ data,setHasImages}: Props) {
    if (!data) return null;
   switch (data.type?.toLowerCase()) {
     case "bar":

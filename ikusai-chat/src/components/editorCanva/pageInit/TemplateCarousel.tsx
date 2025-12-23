@@ -1,10 +1,13 @@
 import { useState } from "react";
 import TemplateCard from "./TemplateCard";
+import type { TemplatePreview } from "../editPage/types";
+import { TemplatePreviewModal } from "./TemplatePreview";
+import { DesignProvider } from "../../../providers/DesignProvider";
 
 interface CarouselProps {
     title: string;
     items: {
-        img: string;
+        thumbnailUrl: string;
         title: string;
         description: string;
     }[];
@@ -12,6 +15,7 @@ interface CarouselProps {
 
 export default function Carousel({ title, items }: CarouselProps) {
     const [index, setIndex] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplatePreview | null>(null);
 
     const cardsPerView = 4;
     const maxIndex = Math.ceil(items.length / cardsPerView) - 1;
@@ -38,11 +42,14 @@ export default function Carousel({ title, items }: CarouselProps) {
                             )
                                 .map((t, i) => (
                                     <div key={i} className="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60 cursor-pointer">
-                                        <TemplateCard
-                                            img={t.img}
+                                        <div onClick={() => setSelectedTemplate(t)}>
+                                           <TemplateCard
+                                            img={t.thumbnailUrl}
                                             title={t.title}
                                             description={t.description}
                                         />
+                                           </div>
+                                        
                                     </div>
                                 ))}
                         </div>
@@ -71,8 +78,6 @@ export default function Carousel({ title, items }: CarouselProps) {
             >
                 ◀
             </button>
-
-
             <button
                 onClick={next}
                 className="
@@ -93,6 +98,18 @@ export default function Carousel({ title, items }: CarouselProps) {
             >  ▶
 
             </button>
+             {/* Preview tipo Canva */}
+      {selectedTemplate && (
+        <TemplatePreviewModal
+          template={selectedTemplate}
+          onClose={() => setSelectedTemplate(null)}
+          onUseTemplate={() => {
+            console.log("Usando plantilla:", selectedTemplate.title);
+            setSelectedTemplate(null);
+          }}
+        />
+        
+      )}
         </div>
 
     );

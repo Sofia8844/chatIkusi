@@ -33,6 +33,52 @@ export interface NewConversationResponse{
     answer?: string;
   };
 }
+//Interface Editor Widget
+export interface DBWidget {
+  id: number;
+  title: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  data: {
+    columns?: string[];
+    type: "bar" | "line" | "pie" | "table" | "doughnut";
+    rows?: any[][];
+    mapping?: {
+      x_key: string | string[];
+      y_key: string | string[];
+    };
+  };
+}
+//Interface Konva
+export interface DBFigure {
+  id: number;
+  type: "rectangle" | "circle" | "arrow" | "diamond" | "text"| "icon"| "img";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text?: string;
+  color?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  fontSize?: number;
+  fontColor?: string;
+  rotation?: number;
+}
+//Interface Editor Diagrams
+export interface TemplateFromDB {
+  id: string;
+  width: number;
+  height: number;
+  title: string;
+  description: string;
+  background: string;
+  thumbnailUrl: string;
+  figures: DBFigure[];
+  widgets?: DBWidget[];
+}
 
 const API_BASE_URL =
     (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||

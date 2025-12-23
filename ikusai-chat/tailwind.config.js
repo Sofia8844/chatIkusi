@@ -44,13 +44,15 @@ keyframes: {
       "0%": { backgroundPosition: "-200% 0" },
       "100%": { backgroundPosition: "200% 0" }
     }
+  
+}
   },
 
 animation: {
   perimeter: "perimeter 8s linear infinite",
     shimmer: "shimmer 3s linear infinite",
 },
-    }
+    
   },
   plugins: [],
 }

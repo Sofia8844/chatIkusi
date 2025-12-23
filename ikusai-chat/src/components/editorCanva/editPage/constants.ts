@@ -130,6 +130,7 @@ export const backgroundPalette = [
   "#d9f99d",
   "linear-gradient(135deg, #d9f99d 0%, #bbf7d0 50%, #bae6fd 100%)",
   "linear-gradient(120deg, #e0f2fe 0%, #a5f3fc 50%, #d1fae5 100%)",
+  "linear-gradient(61deg,rgba(192, 192, 250, 1) 50%, rgba(83, 232, 237, 1) 100%)"
 ];
 
 export const quickTextBlocks = [

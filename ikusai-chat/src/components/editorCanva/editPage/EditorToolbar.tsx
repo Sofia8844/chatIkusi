@@ -7,7 +7,7 @@ interface EditorToolbarProps {
 }
 
 const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
-  const { addPage, undo, redo, canUndo, canRedo, zoom, setZoom, openDashboard } = useDesign();
+  const { addPage, undo, redo, canUndo, canRedo, zoom, setZoom, openDashboard,removeWidgets } = useDesign();
   return (
 
   <div className="relative flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/30 px-4 py-3 shadow-lg backdrop-blur-xl">
@@ -19,7 +19,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onDownload }) => {
           Añadir página
         </button>
             <button
-          onClick={() => openDashboard()}
+          onClick={() => {openDashboard(); removeWidgets()}}
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow hover:scale-[1.01] transition"
         >
          Pizarra

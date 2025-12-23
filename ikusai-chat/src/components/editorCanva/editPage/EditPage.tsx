@@ -113,7 +113,6 @@ const EditorContent: React.FC = () => {
 
 const EditPage: React.FC = () => {
   return (
-    <DesignProvider>
       <ChatProvider>
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-sky-50 to-cyan-100 p-4">
           <div className="flex items-center justify-between px-2 pb-4">
@@ -132,7 +131,6 @@ const EditPage: React.FC = () => {
           <EditorContent />
         </div>
       </ChatProvider>
-    </DesignProvider>
   );
 };
 

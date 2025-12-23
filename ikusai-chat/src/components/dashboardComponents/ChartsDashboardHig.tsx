@@ -80,12 +80,12 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
 
     });
     // Valores dinámicos
-   const values = data.rows.map((r) => {
-        return yIndex.map((i) => {
+    const values = yIndex.map((i) =>
+        data.rows.map((r) => {
             const num = parseFloat(r[i]);
             return isNaN(num) ? 0 : num;
         })
-    })
+    );
     //Valores para diagramas circulares
     const seriesDataDoungh = data.rows.map((r) => ({
         name: r[xIndex] ? r[xIndex] : "",
@@ -104,17 +104,17 @@ const ChartDashboard = forwardRef((props: Props, ref) => {
     const hcType = typeMap[data.type.toLowerCase()] || "column";
          //Series
     const series = hcType === "pie" || hcType === "doughnut"
-  ? [{
-      type: hcType as any,
-      name: data.details || "Datos",
-      data: seriesDataDoungh,
-      colorByPoint: true,
-    }]
-  : yIndex.map((i, idx) => ({
-      type: hcType as any,
-      name: data.mapping.y_key[idx],
-      data: values[idx],
-    }));
+        ? [{
+            type: hcType as any,
+            name: data.details || "Datos",
+            data: seriesDataDoungh,
+            colorByPoint: true,
+        }]
+        : yIndex.map((i, idx) => ({
+            type: hcType as any,
+            name: data.mapping.y_key[idx],
+            data: values[idx],
+        }));
     // Activar 3D para todos los gráficos
     const options: Highcharts.Options = {
         chart: {

@@ -1,7 +1,6 @@
 import Draggable from "react-draggable";
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { ResizableBox } from "react-resizable";
-import type{ Widget } from "../types/chat";
 import { Image as KonvaImage, Layer, Rect, Stage, Text as KonvaText, Transformer } from "react-konva";
 import type Konva from "konva";
 import "react-resizable/css/styles.css";
@@ -14,7 +13,7 @@ import { useDesign } from "../providers/DesignProvider";
 import type {
   CanvasElement,
   IconElement,
-   ImageElement,
+   ImageElement, 
   TextElement,
 } from "./editorCanva/editPage/types";
 interface DashboardCanvasProps {
@@ -184,8 +183,8 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   const editableRef = useRef<HTMLDivElement>(null);
   const editingSessionRef = useRef<string | null>(null);
   const [activeWidget, setActiveWidget] = useState(null);
-  const [widgets, setWidgets] = useState<Widget[]>([]);
-  const [zoom, setZoom] = useState(1);
+/*   const [widgets, setWidgets] = useState<Widget[]>([]);
+ */  const [zoom, setZoom] = useState(1);
   const [mode, setMode] = useState<"select" | "move">("select");
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -196,6 +195,8 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
     const {
       addImageElement,
+      widgets,
+      addWidget
     } = useDesign();
   const [editingState, setEditingState] = useState<{
     id: string;
@@ -467,7 +468,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
          addImageElement(parsed.src, "Imagen arrastrada", 310, 200);
        }
          if( parsed.type !== "image"){
-              setWidgets((prev) => [
+              addWidget((prev) => [
            ...prev,
            {
              id: crypto.randomUUID(),
@@ -489,9 +490,9 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
   };
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
-  const handleRemoveWidget = (id: string) => setWidgets(prev => prev.filter(w => w.id !== id));
+  const handleRemoveWidget = (id: string) => addWidget(prev => prev.filter(w => w.id !== id));
   const updateWidgetLabel = (id: string, newLabel: string) => {
-    setWidgets(prev =>
+    addWidget(prev =>
       prev.map(w => w.id === id ?
         { ...w, label: newLabel } : w)
     );
@@ -500,7 +501,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
     const handleAddFromEvent = (event: any) => {
       const { id, type, label, diagramData } = event.detail;
       setActiveWidget(null);
-      setWidgets((prev) => [
+      addWidget((prev) => [
         ...prev,
         {
           id: id || crypto.randomUUID(),
@@ -675,7 +676,7 @@ const DashboardCanvas: React.FC<DashboardCanvasProps> = ({ isActive, onClose }) 
                     resizeHandles={["s", "e", "n", "w", "ne", "nw", "se", "sw"]}
                     className="relative border border-transparent hover:border-green-500 rounded-md"
                     onResizeStop={(_, data) => {
-                      setWidgets(prev =>
+                      addWidget(prev =>
                         prev.map(w =>
                           w.id === widget.id
                             ? { ...w, width: data.size.width, height: data.size.height }

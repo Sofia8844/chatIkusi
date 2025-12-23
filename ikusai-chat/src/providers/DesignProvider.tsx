@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState,useEffect } from "react";
 import { backgroundPalette, starterTemplates } from "../components/editorCanva/editPage/constants";
 import type {
   CanvasElement,
@@ -6,6 +6,9 @@ import type {
   EditorState,
   TemplatePreset,
 } from "../components/editorCanva/editPage/types";
+import type { TemplateFromDB } from "../api/chatService";
+import { mapDBFigureToCanvasElement, mapDBWidgetToWidget } from "./templateAdapters";
+import type { Widget } from "../types/chat";
 
 interface DesignContextValue {
   state: EditorState;
@@ -20,6 +23,7 @@ interface DesignContextValue {
   addImageElement: (src: string, name?: string, widget?:number, height?:number) => void;
   addIconElement: (text: string) => void;
   applyTemplate: (templateId: string) => void;
+  applyTemplateFromDB: (templateId: string) => void;
   changeBackground: (value: string) => void;
   selectElement: (id: string | null) => void;
   updateElement: (id: string, attrs: Partial<CanvasElement>) => void;
@@ -39,6 +43,9 @@ interface DesignContextValue {
   openDashboard: () => void;
   closeDashboard: () => void;
   toggleDashboard: () => void;
+ widgets: Widget[];
+ addWidget: (updater: (prev: Widget[]) => Widget[]) => void; 
+ removeWidgets: () => void;
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null);
@@ -48,7 +55,7 @@ const cloneState = (value: EditorState): EditorState =>
     ? structuredClone(value)
     : JSON.parse(JSON.stringify(value));
 
-const defaultPage: DesignPage = {
+const createEmptyPage = (): DesignPage => ({
   id: "page-1",
   name: "Página 1",
   background: backgroundPalette[0],
@@ -96,12 +103,11 @@ const defaultPage: DesignPage = {
       fill: "#0d9488",
     },
   ],
-};
-
+});
 export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [state, setState] = useState<EditorState>({
-    pages: [defaultPage],
-    currentPageId: defaultPage.id,
+    pages: [],
+    currentPageId: "",
     selectedElementId: null,
     zoom: 1,
     savedDesigns: [],
@@ -110,7 +116,14 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
 
   // nuevo estado para mostrar dashboard
   const [showDashboard, setShowDashboard] = useState(false);
+  const [widgets, setWidgets] = useState<Widget[]>([]);
 
+const addWidget = (updater: (prev: Widget[]) => Widget[]) => {
+  setWidgets((prev) => updater(prev));
+};
+const removeWidgets = () =>{
+  setWidgets([])
+}
   const [past, setPast] = useState<EditorState[]>([]);
   const [future, setFuture] = useState<EditorState[]>([]);
   // helpers
@@ -150,11 +163,23 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
     return currentPage.elements.find((el) => el.id === state.selectedElementId);
   }, [state.selectedElementId, currentPage]);
 
+  
+useEffect(() => {
+  if (state.pages.length === 0) {
+    const page = createEmptyPage();
+    setState(prev => ({
+      ...prev,
+      pages: [page],
+      currentPageId: page.id,
+    }));
+  }
+}, [state.pages.length]);
   const setCurrentPage = (pageId: string) => {
     setState((prev) => ({ ...prev, currentPageId: pageId, selectedElementId: null }));
   };
 
   const addPage = () => {
+    setWidgets([]);
     commit((draft) => {
       const id = `page-${draft.pages.length + 1}`;
       draft.pages.push({
@@ -321,7 +346,37 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       draft.selectedElementId = null;
     });
   };
+const applyTemplateFromDB = (templateId: TemplateFromDB) => {
+    setWidgets([]);
 
+// 1️⃣ Primero: estado del editor (canvas)
+  commit((draft) => {
+
+    draft.pages = [
+      {
+        id: templateId.id,
+        name: templateId.title,
+        background: templateId.background,
+        elements: templateId.figures.map(mapDBFigureToCanvasElement),
+      },
+    ];
+
+    draft.currentPageId = templateId.id;
+    draft.selectedElementId = null;
+  });
+
+
+  // 2️⃣ Luego: widgets (dashboard)
+  if (templateId.widgets?.length) {
+   templateId.widgets.forEach((dbWidget) => {
+    const widget = mapDBWidgetToWidget(dbWidget);
+    addWidget((prev) => [
+      ...prev,  widget
+    ]);
+    }); 
+
+  }
+};
   const changeBackground = (value: string) => {
     commit((draft) => {
       const page = draft.pages.find((p) => p.id === draft.currentPageId);
@@ -444,6 +499,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       addImageElement,
       addIconElement,
       applyTemplate,
+      applyTemplateFromDB,
       changeBackground,
       selectElement,
       updateElement,
@@ -464,6 +520,9 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       openDashboard,
       closeDashboard,
       toggleDashboard,
+      widgets,
+      addWidget,
+      removeWidgets
     }),
     [
       state,
@@ -477,6 +536,7 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       addImageElement,
       addIconElement,
       applyTemplate,
+      applyTemplateFromDB,
       changeBackground,
       selectElement,
       updateElement,
@@ -491,7 +551,10 @@ export const DesignProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       past.length,
       future.length,
       setZoom,
-      showDashboard
+      showDashboard,
+        widgets,
+      addWidget,
+      removeWidgets
     ]
   );
 
